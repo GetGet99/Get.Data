@@ -1,6 +1,6 @@
 # Get.Data
 
-My library of data bindings, update collections, properties, and more!
+Get.Data is .NET 8 and .NET Standard 2.0 library that can do data bindings, update collections, and properties in C# without any XAML or markup language.
 
 Below is the draft of what this library is about. It is not 100% ready yet but I will just put it up for now.
 
