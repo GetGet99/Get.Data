@@ -27,7 +27,7 @@ filteredMessage.ItemsChanged += (actions) => ...;
 
 Most of the extension method do not cache the value, with the only exception would be the one that has to be cached (Currently `Where` cached the valid indices). This means that there are usually no duplicated data and they are lazily evaluated. However, even though it is lazily evaluated, `ItemsChanged` will be sending out all the changes like ObservableCollection does.
 
-### Other Linq Collection
+### Other Linq-like Collection Methods
 We introduced `IGDReadOnlyCollection`, `IGDFixedSizeCollection`, and `IGDCollection` as an alternative to `IList` and `IReadOnlyList` so that the impelmentations are easier. (because this is an insane fact that not every `IList` is `IReadOnlyList`... wow...)
 
 `Get.Data.Collections.Linq` for non-update collection provide a new view of collection. Modifying the (non-readonly) output collection will edit the original collection, and any new items in original collection will be shown in the resulting collection.
