@@ -5,10 +5,18 @@ using Get.Data.ModelLinker;
 namespace Get.Data.DataTemplates;
 public static class CollectionBindingExtension
 {
-    public static IDisposable Bind<TSrc, TOut>(this IUpdateReadOnlyCollection<TSrc> collection, IGDCollection<TOut> @out, DataTemplate<TSrc, TOut> dataTemplate)
+    public static IDisposable Bind<TSrc, TOut>(this IUpdateReadOnlyCollection<TSrc> collection, IGDCollection<TOut> @out, DataTemplate<TSrc, TOut> dataTemplate
+#if DEBUG
+        , bool debug = false
+#endif
+        )
     {
         UpdateCollection<DataTemplateGeneratedValue<TSrc, TOut>> middleCollection = new();
-        var a = new TemplateLinker<TSrc, TOut>(collection, middleCollection, dataTemplate);
+        var a = new TemplateLinker<TSrc, TOut>(collection, middleCollection, dataTemplate)
+#if DEBUG
+        { DebugMode = debug }
+        #endif
+        ;
         var b = middleCollection.Select(x => x.GeneratedValue).Bind(@out);
         a.ResetAndReadd();
         return new Disposable(() =>

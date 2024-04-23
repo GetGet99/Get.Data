@@ -1,4 +1,3 @@
-#nullable enable
 namespace Get.Data.ModelLinker;
 
 using System.Collections.Generic;
@@ -6,6 +5,7 @@ using System;
 using System.Collections.Specialized;
 using Get.Data.Collections.Update;
 using Get.Data.Collections;
+using System.Diagnostics;
 
 public class UpdateCollectionModelLinker<T>(IUpdateReadOnlyCollection<T> source, IGDCollection<T> dest) : UpdateCollectionModelLinker<T, T>(source, dest)
 {
@@ -28,6 +28,9 @@ public abstract class UpdateCollectionModelLinker<TSource, TDest> : IDisposable
     public readonly IGDCollection<TDest> DestinationList;
     public event Action? UpdateCompleted;
     readonly LinkedList<TDest> hibernatedInstances = new();
+#if DEBUG
+    public bool DebugMode { get; set; }
+#endif
     public UpdateCollectionModelLinker(IUpdateReadOnlyCollection<TSource> source, IGDCollection<TDest> dest)
     {
         SourceUpdateCollection = source;
@@ -37,6 +40,9 @@ public abstract class UpdateCollectionModelLinker<TSource, TDest> : IDisposable
 
     private void Source_ItemsChanged(IEnumerable<IUpdateAction<TSource>> actions)
     {
+#if DEBUG
+        if (DebugMode) Debugger.Break();
+#endif
         foreach (var action in actions)
         {
             switch (action)
@@ -69,7 +75,7 @@ public abstract class UpdateCollectionModelLinker<TSource, TDest> : IDisposable
                 case ItemsReplacedUpdateAction<TSource> replaced:
                     if (SourceUpdateCollection.Count != DestinationList.Count)
                         goto Reset;
-                    InplaceUpdate(replaced.Index);
+                    InplaceUpdate(replaced.Index, replaced.NewItem);
                     break;
             }
         }
@@ -80,11 +86,10 @@ public abstract class UpdateCollectionModelLinker<TSource, TDest> : IDisposable
         OnUpdateCompleted();
         UpdateCompleted?.Invoke();
     }
-
-    void InplaceUpdate(int idx)
+    void InplaceUpdate(int idx) => InplaceUpdate(idx, SourceUpdateCollection[idx]);
+    void InplaceUpdate(int idx, TSource newSrcItem)
     {
         var oldDestItem = DestinationList[idx];
-        var newSrcItem = SourceUpdateCollection[idx];
         if (!TryInplaceUpdate(newSrcItem, DestinationList[idx]))
         {
             DestinationList[idx] = GetNewDest(newSrcItem);
