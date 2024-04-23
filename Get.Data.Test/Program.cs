@@ -3,8 +3,10 @@ using System.Collections.ObjectModel;
 using Get.Data.Test;
 using Get.Data.XACL;
 using Get.Data.Collections;
-using Get.Data.Bindings;
 using Get.Data.Bindings.Linq;
+using Get.Data.DataTemplates;
+using Get.Data.Bindings;
+using Get.Data.Collections.Linq;
 
 UpdateCollectionInitializer<Person> people = [
     new() { Age = 18, Name = "Person 1" },
@@ -42,6 +44,13 @@ StackPanel rootStackPanel = new()
 PrintVisualTree(rootStackPanel);
 
 people[1].Name = "random name";
+
+people.RemoveAt(1);
+people.Insert(1, new Person { Name = "Person 4", Age = 23 });
+people.RemoveAt(1);
+people.Insert(1, new Person { Name = "Person 4", Age = 23 });
+people.RemoveAt(1);
+people.Insert(1, new Person { Name = "Person 4", Age = 23 });
 
 Console.WriteLine("After Changing Value");
 

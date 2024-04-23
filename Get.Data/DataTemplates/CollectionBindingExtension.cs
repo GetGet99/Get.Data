@@ -1,16 +1,16 @@
-using Get.Data.Bindings;
+using Get.Data.Collections;
+using Get.Data.Collections.Linq;
 using Get.Data.Collections.Update;
 using Get.Data.ModelLinker;
-namespace Get.Data.Collections;
-public static class CollectionBinderExtension
+namespace Get.Data.DataTemplates;
+public static class CollectionBindingExtension
 {
     public static IDisposable Bind<TSrc, TOut>(this IUpdateReadOnlyCollection<TSrc> collection, IGDCollection<TOut> @out, DataTemplate<TSrc, TOut> dataTemplate)
     {
         UpdateCollection<DataTemplateGeneratedValue<TSrc, TOut>> middleCollection = new();
         var a = new TemplateLinker<TSrc, TOut>(collection, middleCollection, dataTemplate);
-        var b = new RefRemover<TSrc, TOut>(middleCollection, @out);
+        var b = middleCollection.Select(x => x.GeneratedValue).Bind(@out);
         a.ResetAndReadd();
-        //b.ResetAndReadd();
         return new Disposable(() =>
         {
             a.Dispose();
@@ -18,8 +18,6 @@ public static class CollectionBinderExtension
             @out.Clear();
         });
     }
-    public static IDisposable Bind<T>(this IUpdateCollection<T> collection, IGDCollection<T> @out)
-        => collection.Bind(@out);
     public static IDisposable Bind<T>(this IUpdateReadOnlyCollection<T> collection, IGDCollection<T> @out)
     {
         var linker = new UpdateCollectionModelLinker<T>(collection, @out);

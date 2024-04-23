@@ -5,8 +5,7 @@ using System.Collections;
 
 namespace Get.Data.Collections;
 
-
-class TwoWayUpdateCollectionProperty<T> : UpdateCollectionPropertyBase<T, IUpdateCollection<T>>, IUpdateCollection<T>
+public class TwoWayUpdateCollectionProperty<T> : UpdateCollectionPropertyBase<T, IUpdateCollection<T>>, IUpdateCollection<T>
 {
     public TwoWayUpdateCollectionProperty() : base(new UpdateCollection<T>())
     {
@@ -34,7 +33,7 @@ class TwoWayUpdateCollectionProperty<T> : UpdateCollectionPropertyBase<T, IUpdat
         CurrentValue.Move(index1, index2);
     }
 }
-class OneWayUpdateCollectionProperty<T> : UpdateCollectionPropertyBase<T, IUpdateReadOnlyCollection<T>>, IUpdateReadOnlyCollection<T>
+public class OneWayUpdateCollectionProperty<T> : UpdateCollectionPropertyBase<T, IUpdateReadOnlyCollection<T>>, IUpdateReadOnlyCollection<T>
 {
     public OneWayUpdateCollectionProperty() : base(new UpdateCollection<T>())
     {
@@ -44,7 +43,7 @@ class OneWayUpdateCollectionProperty<T> : UpdateCollectionPropertyBase<T, IUpdat
 
     public int Count => CurrentValue.Count;
 }
-abstract class UpdateCollectionPropertyBase<T, TCollection> : Property<TCollection>, IEnumerable<T> /* for syntax sugar */ where TCollection : IUpdateReadOnlyCollection<T>
+public abstract class UpdateCollectionPropertyBase<T, TCollection> : Property<TCollection>, IEnumerable<T> /* for syntax sugar */ where TCollection : IUpdateReadOnlyCollection<T>
 {
     readonly IUpdateCollection<T> currentValue = new UpdateCollection<T>();
     protected IUpdateCollection<T> CurrentValue => currentValue;

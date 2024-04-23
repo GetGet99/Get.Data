@@ -28,7 +28,7 @@ public sealed class PropertyDefinition<TOwnerType, TPropertyType>(Func<TOwnerTyp
     public override PropertyBase<TPropertyType> GetProperty(TOwnerType owner)
         => getProperty(owner);
 }
-static class PropertyDefinition
+public static class PropertyDefinition
 {
     public static PropertyDefinition<TOwnerType, TPropertyType> Create<TOwnerType, TPropertyType>(Func<TOwnerType, PropertyBase<TPropertyType>> getProperty)
         => new(getProperty);

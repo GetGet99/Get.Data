@@ -5,6 +5,7 @@
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
 		<LangVersion>12</LangVersion>
+		<Version>1.0.3</Version>
 	</PropertyGroup>
 
 	<ItemGroup>

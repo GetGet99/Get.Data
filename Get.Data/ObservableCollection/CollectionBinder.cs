@@ -1,9 +1,11 @@
-﻿using Get.Data.ModelLinker;
+﻿using Get.Data.Bindings;
+using Get.Data.DataTemplates;
+using Get.Data.ModelLinker;
 using System.Collections;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 
-namespace Get.Data.Bindings;
+namespace Get.Data.ObservableCollection.Bindings;
 
 public class CollectionBinder
 {
@@ -46,10 +48,6 @@ public class CollectionBinder
     {
         protected override TTarget CreateFrom(T source) => source;
     }
-}
-readonly struct Disposable(Action OnDispose) : IDisposable
-{
-    public void Dispose() => OnDispose();
 }
 class TemplateLinker<TSourceCollection, TSource, TDest>(TSourceCollection source, ObservableCollection<DataTemplateGeneratedValue<TSource, TDest>> dest, DataTemplate<TSource, TDest> dataTemplate) : ObservableCollectionModelLinker<TSourceCollection, TSource, DataTemplateGeneratedValue<TSource, TDest>>(source, dest) where TSourceCollection : IReadOnlyList<TSource>, INotifyCollectionChanged
 {

@@ -5,14 +5,19 @@ namespace Get.Data.Bindings.Linq;
 class SelectPropertyPathBase<TOwner, TOut>(IReadOnlyBinding<TOwner> bindingOwner, IPropertyDefinition<TOwner, TOut> pDef) : BindingNotifyBase<TOut>
 {
     TOwner owner = bindingOwner.CurrentValue;
-    void SetData(TOwner value)
+    void SetData(TOwner newOwner)
     {
-        if (EqualityComparer<TOwner>.Default.Equals(owner, value))
+        if (EqualityComparer<TOwner>.Default.Equals(owner, newOwner))
             return;
         UnregisterValueChangingEvents();
         UnregisterValueChangedEvents();
-        owner = value;
-        currentProperty = pDef.GetProperty(value);
+        var oldValue = currentProperty.Value;
+        var newProperty = pDef.GetProperty(newOwner);
+        var newValue = newProperty.Value;
+        InvokeValueChanging(oldValue, newValue);
+        owner = newOwner;
+        currentProperty = newProperty;
+        InvokeValueChanged(oldValue, newValue);
         RegisterValueChangingEventsIfNeeded();
         RegisterValueChangedEventsIfNeeded();
     }

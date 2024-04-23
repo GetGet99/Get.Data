@@ -2,11 +2,11 @@
 using Get.Data.Collections;
 using Get.Data.Collections.Conversion;
 using Get.Data.Collections.Linq;
-using Get.Data.Collections;
 using Get.Data.Collections.Update;
 using Get.Data.Properties;
 using System.Collections;
 using System.Runtime.CompilerServices;
+using Get.Data.DataTemplates;
 
 namespace Get.Data.XACL;
 interface ICollectionItemsBinding<TTarget> { }
