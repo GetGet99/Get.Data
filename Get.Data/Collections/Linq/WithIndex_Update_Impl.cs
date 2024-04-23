@@ -27,7 +27,7 @@ abstract class WithIndexUpdateBase<T>(IUpdateReadOnlyCollection<T> src) : Collec
                             startingIndex, item.WithIndex().Select(x => new(x.Index + startingIndex, x.Value))
                         );
                         // Sends update to everything else above that
-                        for (int i = startingIndex + item.Count - 1; i < src.Count; i++)
+                        for (int i = startingIndex + item.Count; i < src.Count; i++)
                         {
                             yield return new ItemsReplacedUpdateAction<IndexItem<T>>(i, new(i - itemsAdded, src[i]), new(i, src[i]));
                         }
@@ -41,7 +41,7 @@ abstract class WithIndexUpdateBase<T>(IUpdateReadOnlyCollection<T> src) : Collec
                             startingIndex, item.WithIndex().Select(x => new(x.Index + startingIndex, x.Value))
                         );
                         // Sends update to everything else above that
-                        for (int i = startingIndex + item.Count - 1; i < src.Count; i++)
+                        for (int i = startingIndex; i < src.Count; i++)
                         {
                             yield return new ItemsReplacedUpdateAction<IndexItem<T>>(i, new(i + itemsRemoved, src[i]), new(i, src[i]));
                         }
