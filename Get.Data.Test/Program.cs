@@ -1,12 +1,14 @@
-﻿using Get.Data.Collections.Update;
-using System.Collections.ObjectModel;
-using Get.Data.Test;
+﻿using Get.Data.Test;
 using Get.Data.XACL;
 using Get.Data.Collections;
 using Get.Data.Bindings.Linq;
 using Get.Data.DataTemplates;
-using Get.Data.Bindings;
 using Get.Data.Collections.Linq;
+
+//Test.UpdateTest(x => x.Select(x => x.ToString()), [1200195957], src => src[0] = 2099272109);
+Test.RandomSimpleUpdateTest("Select", x => x.Select(x => x.ToString()));
+Test.RandomSimpleUpdateTest("WithIndex", x => x.WithIndex());
+
 
 UpdateCollectionInitializer<Person> people = [
     new() { Age = 18, Name = "Person 1" },

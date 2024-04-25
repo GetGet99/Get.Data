@@ -26,9 +26,17 @@ public static class CollectionBindingExtension
             @out.Clear();
         });
     }
-    public static IDisposable Bind<T>(this IUpdateReadOnlyCollection<T> collection, IGDCollection<T> @out)
+    public static IDisposable Bind<T>(this IUpdateReadOnlyCollection<T> collection, IGDCollection<T> @out
+        #if DEBUG
+        , bool debug = false
+#endif
+        )
     {
-        var linker = new UpdateCollectionModelLinker<T>(collection, @out);
+        var linker = new UpdateCollectionModelLinker<T>(collection, @out)
+#if DEBUG
+        { DebugMode = debug }
+#endif
+        ;
         linker.ResetAndReadd();
         return new Disposable(() =>
         {
