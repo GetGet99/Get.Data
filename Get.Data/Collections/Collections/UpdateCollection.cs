@@ -16,7 +16,12 @@ public class UpdateCollection<T> : IUpdateCollection<T>
     List<T> list = [];
     public T this[int index] {
         get => list[index];
-        set => list[index] = value;
+        set
+        {
+            var oldValue = list[index];
+            list[index] = value;
+            ItemsChanged?.Invoke([new ItemsReplacedUpdateAction<T>(index, oldValue, value)]);
+        }
     }
 
     public int Count => list.Count;
