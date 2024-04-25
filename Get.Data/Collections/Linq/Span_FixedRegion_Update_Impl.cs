@@ -1,16 +1,10 @@
 ﻿using Get.Data.Collections.Update;
-using System;
-using System.Reflection;
+using System.Diagnostics;
 namespace Get.Data.Collections.Linq;
 
-public class SpanFixedRegionUpdate<T>(IUpdateFixedSizeCollection<T> src, int initialOffset = 0, int initialLength = 0) : CollectionUpdateEvent<T>, IUpdateFixedSizeCollection<T>
+public class SpanFixedRegionUpdateBase<T>(IUpdateReadOnlyCollection<T> src, int initialOffset = 0, int initialLength = 0) : CollectionUpdateEvent<T>
 {
     IGDReadOnlyCollection<T> cached = src.EvalFixedSize();
-    public T this[int index]
-    {
-        get => src[index + Offset];
-        set => src[index + Offset] = value;
-    }
     int _Offset = initialOffset;
     public int Offset { get => _Offset; set => _Offset = value; }
     int _Length = initialLength;
@@ -30,38 +24,59 @@ public class SpanFixedRegionUpdate<T>(IUpdateFixedSizeCollection<T> src, int ini
                     if (added.StartingIndex >= Offset && added.StartingIndex - Offset < Length)
                         yield return new ItemsAddedUpdateAction<T>(
                             added.StartingIndex + Offset,
-                            added.Items.Span(0..(added.StartingIndex + Math.Min(Length - added.StartingIndex, added.Items.Count)))
+                            added.Items.Span(0..(added.StartingIndex + Math.Min(Length - added.StartingIndex, added.Items.Count))),
+                            Math.Min(Length, Math.Max(0, added.OldCollectionCount - Offset))
                         );
                     else if (added.StartingIndex < Offset)
                     {
                         var affectedLength = Math.Min(Length, added.Items.Count);
                         var cachedSpan = cached.Span(Offset..(Offset + Length));
                         var oldItems = cached.Span(added.StartingIndex..Offset);
+                        var count = Math.Min(Length, Math.Max(0, added.OldCollectionCount - Offset));
                         if (oldItems.Count >= affectedLength)
                         {
+                            var addedItems = oldItems.Span(^affectedLength..);
                             yield return new ItemsAddedUpdateAction<T>(0,
-                                oldItems.Span(^affectedLength..)
+                                addedItems,
+                                count
                             );
+                            count += addedItems.Count;
+
+                            var removedItems = cachedSpan.Span(^affectedLength..);
                             yield return new ItemsRemovedUpdateAction<T>(0,
-                                cachedSpan.Span(^affectedLength..)
+                                removedItems,
+                                count
                             );
+                            count -= removedItems.Count;
                         }
                         else
                         {
+                            if (oldItems.Count > 0)
+                                yield return new ItemsAddedUpdateAction<T>(0,
+                                    oldItems,
+                                    count
+                                );
+                            count += oldItems.Count;
+                            if ((cachedSpan = cachedSpan.Span(^oldItems.Count..)).Count > 0)
+                                yield return new ItemsRemovedUpdateAction<T>(0,
+                                    cachedSpan,
+                                    count
+                                );
+                            count -= cachedSpan.Count;
+                            var addedItems = added.Items.Span(^Math.Max(0, affectedLength - Offset)..);
                             yield return new ItemsAddedUpdateAction<T>(0,
-                                oldItems
+                                addedItems,
+                                count
                             );
-                            yield return new ItemsRemovedUpdateAction<T>(0,
-                                (cachedSpan = cachedSpan.Span(^oldItems.Count..))
-                            );
-                            yield return new ItemsAddedUpdateAction<T>(0,
-                                added.Items.Span(^(affectedLength - Offset)..)
-                            );
+                            count += addedItems.Count;
                             //if (affectedLength - Offset <= cachedSpan.Count)
                             //{
+                            var removedItems = cachedSpan.Span(^Math.Max(0, affectedLength - Offset)..);
                             yield return new ItemsRemovedUpdateAction<T>(0,
-                                 cachedSpan.Span(^(affectedLength - Offset)..)
+                                 removedItems,
+                                 count
                              );
+                            count -= removedItems.Count;
                             //}
                             //else
                             //{
@@ -69,7 +84,8 @@ public class SpanFixedRegionUpdate<T>(IUpdateFixedSizeCollection<T> src, int ini
                             //}
                         }
                         yield return new ItemsRemovedUpdateAction<T>(0,
-                            cached.Span(Math.Max(0, Offset - Math.Min(Length, added.Items.Count))..Offset)
+                            cached.Span(Math.Max(0, Offset - Math.Min(Length, added.Items.Count))..Offset),
+                            count
                         );
                     }
                     break;
@@ -77,11 +93,13 @@ public class SpanFixedRegionUpdate<T>(IUpdateFixedSizeCollection<T> src, int ini
                     if (removed.StartingIndex >= Offset && removed.StartingIndex - Offset < Length)
                         yield return new ItemsRemovedUpdateAction<T>(
                             removed.StartingIndex + Offset,
-                            removed.Items.Span(0..(removed.StartingIndex + Math.Min(Length - removed.StartingIndex, removed.Items.Count)))
+                            removed.Items.Span(0..(removed.StartingIndex + Math.Min(Length - removed.StartingIndex, removed.Items.Count))),
+                            Math.Min(Length, Math.Max(0, removed.OldCollectionCount - Offset))
                         );
                     else if (removed.StartingIndex < Offset)
                         yield return new ItemsRemovedUpdateAction<T>(0,
-                            cached.Span(Math.Max(0, Offset - Math.Min(Length, removed.Items.Count))..Offset)
+                            cached.Span(Math.Max(0, Offset - Math.Min(Length, removed.Items.Count))..Offset),
+                            Math.Min(Length, Math.Max(0, removed.OldCollectionCount - Offset))
                         );
                     // need to invoke items added
                     break;
@@ -104,13 +122,13 @@ public class SpanFixedRegionUpdate<T>(IUpdateFixedSizeCollection<T> src, int ini
                         if (isNewIn)
                         {
                             yield return new ItemsReplacedUpdateAction<T>(
-                                moved.NewIndex, moved.NewIndexItem, moved.OldIndexItem
+                                moved.NewIndex - Offset, moved.NewIndexItem, moved.OldIndexItem
                             );
                         }
                         else if (isOldIn)
                         {
                             yield return new ItemsReplacedUpdateAction<T>(
-                                moved.OldIndex, moved.OldIndexItem, moved.NewIndexItem
+                                moved.OldIndex - Offset, moved.OldIndexItem, moved.NewIndexItem
                             );
                         }
                     }

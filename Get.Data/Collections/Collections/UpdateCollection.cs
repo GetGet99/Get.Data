@@ -32,13 +32,13 @@ public class UpdateCollection<T> : IUpdateCollection<T>
     {
         var oldList = list;
         list = [];
-        ItemsChanged?.Invoke([new ItemsRemovedUpdateAction<T>(0, oldList.AsGDReadOnlyCollection())]);
+        ItemsChanged?.Invoke([new ItemsRemovedUpdateAction<T>(0, oldList.AsGDReadOnlyCollection(), oldList.Count)]);
     }
 
     public void Insert(int index, T item)
     {
         list.Insert(index, item);
-        ItemsChanged?.Invoke([new ItemsAddedUpdateAction<T>(index, Collection.Single(item))]);
+        ItemsChanged?.Invoke([new ItemsAddedUpdateAction<T>(index, Collection.Single(item), list.Count - 1)]);
     }
 
     public void Move(int index1, int index2)
@@ -50,7 +50,7 @@ public class UpdateCollection<T> : IUpdateCollection<T>
     {
         var item = list[index];
         list.RemoveAt(index);
-        ItemsChanged?.Invoke([new ItemsRemovedUpdateAction<T>(index, Collection.Single(item))]);
+        ItemsChanged?.Invoke([new ItemsRemovedUpdateAction<T>(index, Collection.Single(item), list.Count + 1)]);
     }
 
 }

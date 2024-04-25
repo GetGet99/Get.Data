@@ -16,9 +16,9 @@ abstract class SelectUpdateBase<TSrc, TDest>(IUpdateReadOnlyCollection<TSrc> src
         x switch
         {
             ItemsAddedUpdateAction<TSrc> x1 =>
-                new ItemsAddedUpdateAction<TDest>(x1.StartingIndex, x1.Items.Select(forward)),
+                new ItemsAddedUpdateAction<TDest>(x1.StartingIndex, x1.Items.Select(forward), x1.OldCollectionCount),
             ItemsRemovedUpdateAction<TSrc> x1 =>
-                new ItemsRemovedUpdateAction<TDest>(x1.StartingIndex, x1.Items.Select(forward)),
+                new ItemsRemovedUpdateAction<TDest>(x1.StartingIndex, x1.Items.Select(forward), x1.OldCollectionCount),
             ItemsMovedUpdateAction<TSrc> x1 =>
                 new ItemsMovedUpdateAction<TDest>(
                     x1.OldIndex, x1.NewIndex, forward(x1.OldIndexItem), forward(x1.NewIndexItem)

@@ -21,13 +21,14 @@ abstract class WithIndexUpdateBase<T>(IUpdateReadOnlyCollection<T> src) : Collec
             {
                 case ItemsAddedUpdateAction<T> added:
                     {
-                        (int startingIndex, IGDReadOnlyCollection<T> item) = (added.StartingIndex, added.Items);
-                        int itemsAdded = item.Count;
+                        (int startingIndex, IGDReadOnlyCollection<T> items) = (added.StartingIndex, added.Items);
+                        int itemsAdded = items.Count;
                         yield return new ItemsAddedUpdateAction<IndexItem<T>>(
-                            startingIndex, item.WithIndex().Select(x => new(x.Index + startingIndex, x.Value))
+                            startingIndex, items.WithIndex().Select(x => new(x.Index + startingIndex, x.Value)),
+                            added.OldCollectionCount
                         );
                         // Sends update to everything else above that
-                        for (int i = startingIndex + item.Count; i < src.Count; i++)
+                        for (int i = startingIndex + items.Count; i < src.Count; i++)
                         {
                             yield return new ItemsReplacedUpdateAction<IndexItem<T>>(i, new(i - itemsAdded, src[i]), new(i, src[i]));
                         }
@@ -35,10 +36,11 @@ abstract class WithIndexUpdateBase<T>(IUpdateReadOnlyCollection<T> src) : Collec
                     break;
                 case ItemsRemovedUpdateAction<T> removed:
                     {
-                        (int startingIndex, IGDReadOnlyCollection<T> item) = (removed.StartingIndex, removed.Items);
-                        int itemsRemoved = item.Count;
+                        (int startingIndex, IGDReadOnlyCollection<T> items) = (removed.StartingIndex, removed.Items);
+                        int itemsRemoved = items.Count;
                         yield return new ItemsRemovedUpdateAction<IndexItem<T>>(
-                            startingIndex, item.WithIndex().Select(x => new(x.Index + startingIndex, x.Value))
+                            startingIndex, items.WithIndex().Select(x => new(x.Index + startingIndex, x.Value)),
+                            removed.OldCollectionCount
                         );
                         // Sends update to everything else above that
                         for (int i = startingIndex; i < src.Count; i++)
@@ -49,11 +51,15 @@ abstract class WithIndexUpdateBase<T>(IUpdateReadOnlyCollection<T> src) : Collec
                     break;
                     case ItemsMovedUpdateAction<T> moved:
                     {
-                        yield return new ItemsMovedUpdateAction<IndexItem<T>>(
+                        yield return new ItemsReplacedUpdateAction<IndexItem<T>>(
                             moved.OldIndex,
-                            moved.NewIndex,
                             new(moved.OldIndex, moved.OldIndexItem),
-                            new(moved.NewIndex, moved.NewIndexItem)
+                            new(moved.OldIndex, moved.NewIndexItem)
+                        );
+                        yield return new ItemsReplacedUpdateAction<IndexItem<T>>(
+                            moved.NewIndex,
+                            new(moved.NewIndex, moved.NewIndexItem),
+                            new(moved.NewIndex, moved.OldIndexItem)
                         );
                     }
                     break;

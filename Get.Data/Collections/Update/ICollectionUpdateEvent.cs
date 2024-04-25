@@ -16,11 +16,11 @@ public interface IUpdateAction<T>
 {
     UpdateKinds UpdateKind { get; }
 }
-public readonly record struct ItemsAddedUpdateAction<T>(int StartingIndex, IGDReadOnlyCollection<T> Items) : IUpdateAction<T>
+public readonly record struct ItemsAddedUpdateAction<T>(int StartingIndex, IGDReadOnlyCollection<T> Items, int OldCollectionCount) : IUpdateAction<T>
 {
     public UpdateKinds UpdateKind => UpdateKinds.Added;
 }
-public readonly record struct ItemsRemovedUpdateAction<T>(int StartingIndex, IGDReadOnlyCollection<T> Items) : IUpdateAction<T>
+public readonly record struct ItemsRemovedUpdateAction<T>(int StartingIndex, IGDReadOnlyCollection<T> Items, int OldCollectionCount) : IUpdateAction<T>
 {
     public UpdateKinds UpdateKind => UpdateKinds.Removed;
 }

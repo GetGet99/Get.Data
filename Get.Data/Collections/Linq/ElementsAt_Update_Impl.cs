@@ -24,9 +24,9 @@ public class ElementsAtUpdateBase<T>(IUpdateReadOnlyCollection<T> src, IUpdateRe
         InvokeItemsChanged(actions.Select<IUpdateAction<int>, IUpdateAction<T>>(x => x switch
         {
             ItemsAddedUpdateAction<int> added =>
-            new ItemsAddedUpdateAction<T>(added.StartingIndex, src.ElementsAt(added.Items)),
+            new ItemsAddedUpdateAction<T>(added.StartingIndex, src.ElementsAt(added.Items), added.OldCollectionCount),
             ItemsRemovedUpdateAction<int> removed =>
-            new ItemsRemovedUpdateAction<T>(removed.StartingIndex, src.ElementsAt(removed.Items)),
+            new ItemsRemovedUpdateAction<T>(removed.StartingIndex, src.ElementsAt(removed.Items), removed.OldCollectionCount),
             ItemsMovedUpdateAction<int> moved =>
             new ItemsMovedUpdateAction<T>(moved.OldIndex, moved.NewIndex, src[moved.OldIndexItem], src[moved.NewIndexItem]),
             ItemsReplacedUpdateAction<int> replaced =>
