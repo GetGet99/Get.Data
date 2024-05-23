@@ -31,6 +31,8 @@ public class ElementsAtUpdateBase<T>(IUpdateReadOnlyCollection<T> src, IUpdateRe
             new ItemsMovedUpdateAction<T>(moved.OldIndex, moved.NewIndex, src[moved.OldIndexItem], src[moved.NewIndexItem]),
             ItemsReplacedUpdateAction<int> replaced =>
             new ItemsReplacedUpdateAction<T>(replaced.Index, src[replaced.OldItem], src[replaced.NewItem]),
+            IndexConditionItemUpdate<T> replaced =>
+            new ItemsReplacedUpdateAction<T>(replaced.Index, replaced.OldItem, replaced.NewItem),
             _ => throw new InvalidCastException(),
         }));
     }

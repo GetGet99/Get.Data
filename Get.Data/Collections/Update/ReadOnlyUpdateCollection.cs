@@ -8,4 +8,10 @@ class ReadOnlyUpdateCollection<T>(IUpdateCollection<T> src) : CollectionUpdateEv
         => src.ItemsChanged += InvokeItemsChanged;
     protected override void UnregisterItemsChangedEvent()
         => src.ItemsChanged -= InvokeItemsChanged;
+#if DEBUG
+    public override string ToString()
+    {
+        return $"{src} > ReadOnlyUpdateCollection";
+    }
+#endif
 }

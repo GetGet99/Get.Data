@@ -80,7 +80,7 @@ class WhereIndexCondition<T> : CollectionUpdateEvent<int>, IUpdateReadOnlyCollec
         for (int i = 0; i < PassIndices.Count; i++)
         {
             if (PassIndices[i] == givenIdx) return i;
-            if (PassIndices[i] > givenIdx) return i - 1;
+            if (PassIndices[i] > givenIdx) return i;// i - 1;
         }
         return -1;
     }
@@ -96,23 +96,29 @@ class WhereIndexCondition<T> : CollectionUpdateEvent<int>, IUpdateReadOnlyCollec
             {
                 case ItemsAddedUpdateAction<T> added:
                     {
+                        // increment
+                        for (int i = 0; i < PassIndices.Count; i++)
+                        {
+                            if (PassIndices[i] >= added.StartingIndex)
+                                PassIndices[i] += added.Items.Count;
+                        }
                         int passIdx = -2;
                         for (int i = 0; i < added.Items.Count; i++)
                         {
                             if (ConditionFunction(added.Items[i]))
                             {
-                                if (passIdx == -2) SearchLowerNextIdx(added.StartingIndex + i);
+                                if (passIdx == -2) passIdx = SearchLowerNextIdx(added.StartingIndex + i);
                                 if (passIdx == -1)
                                 {
-                                    PassIndices.Add(i);
-                                    yield return new ItemsAddedUpdateAction<int>(PassIndices[i] - 1,
+                                    PassIndices.Add(added.StartingIndex + i);
+                                    yield return new ItemsAddedUpdateAction<int>(PassIndices.Count - 1,
                                         Collection.Single(added.StartingIndex + i),
                                         PassIndices.Count - 1
                                     );
                                 }
                                 else
                                 {
-                                    PassIndices.Insert(passIdx, i);
+                                    PassIndices.Insert(passIdx, added.StartingIndex + i);
                                     yield return new ItemsAddedUpdateAction<int>(
                                         passIdx,
                                         Collection.Single(added.StartingIndex + i),
@@ -126,7 +132,7 @@ class WhereIndexCondition<T> : CollectionUpdateEvent<int>, IUpdateReadOnlyCollec
                     break;
                 case ItemsRemovedUpdateAction<T> removed:
                     {
-                        for (int i = 0; i < removed.Items.Count; i++)
+                        for (int i = removed.Items.Count - 1; i >= 0; i--)
                         {
                             // I'm getting very lazy.
                             int idx;
@@ -139,6 +145,12 @@ class WhereIndexCondition<T> : CollectionUpdateEvent<int>, IUpdateReadOnlyCollec
                                     PassIndices.Count + 1
                                 );
                             }
+                        }
+                        // decrement
+                        for (int i = 0; i < PassIndices.Count; i++)
+                        {
+                            if (PassIndices[i] >= removed.StartingIndex)
+                                PassIndices[i] -= removed.Items.Count;
                         }
                     }
                     break;
@@ -153,6 +165,12 @@ class WhereIndexCondition<T> : CollectionUpdateEvent<int>, IUpdateReadOnlyCollec
                                 yield return new ItemsRemovedUpdateAction<int>(
                                     idx, Collection.Single(replaced.Index),
                                     PassIndices.Count + 1
+                                );
+                            } else
+                            {
+                                yield return new IndexConditionItemUpdate<T>(
+                                    idx, replaced.OldItem,
+                                    replaced.NewItem
                                 );
                             }
                         }
@@ -183,31 +201,48 @@ class WhereIndexCondition<T> : CollectionUpdateEvent<int>, IUpdateReadOnlyCollec
                     break;
                 case ItemsMovedUpdateAction<T> moved:
                     {
-                        int idx;
-                        if ((idx = PassIndices.IndexOf(moved.OldIndex)) >= 0)
+                        int idxOld = PassIndices.IndexOf(moved.OldIndex), idxNew = PassIndices.IndexOf(moved.NewIndex);
+                        if (idxOld < 0 && idxNew < 0) break;
+                        if (idxOld >= 0 && idxNew >= 0)
                         {
-                            PassIndices.RemoveAt(idx);
+                            yield return new ItemsMovedUpdateAction<int>(
+                                idxOld, idxNew, PassIndices[idxOld], PassIndices[idxNew]
+                            );
+                            break;
+                        }
+                        if (idxOld < 0)
+                        {
+                            moved = new(
+                                OldIndex: moved.NewIndex,
+                                NewIndex: moved.OldIndex,
+                                OldIndexItem: moved.NewIndexItem,
+                                NewIndexItem: moved.OldIndexItem);
+
+                            (idxOld, idxNew) = (idxNew, idxOld);
+                        }
+                        {
+                            PassIndices.RemoveAt(idxOld);
                             yield return new ItemsRemovedUpdateAction<int>(
-                                idx, Collection.Single(moved.OldIndex),
+                                idxOld, Collection.Single(moved.OldIndex),
                                     PassIndices.Count + 1
                             );
                             if (moved.OldIndex > moved.NewIndex)
                             {
-                                while (idx > 0 && PassIndices[idx - 1] > moved.NewIndex)
-                                    idx--;
-                                PassIndices.Insert(idx, moved.NewIndex);
+                                while (idxOld > 0 && PassIndices[idxOld - 1] > moved.NewIndex)
+                                    idxOld--;
+                                PassIndices.Insert(idxOld, moved.NewIndex);
                                 yield return new ItemsAddedUpdateAction<int>(
-                                    idx, Collection.Single(moved.NewIndex),
+                                    idxOld, Collection.Single(moved.NewIndex),
                                         PassIndices.Count - 1
                                 );
                             }
                             else
                             {
-                                while (idx < 0 && PassIndices[idx] < moved.NewIndex)
-                                    idx++;
-                                PassIndices.Insert(idx, moved.NewIndex);
+                                while (idxOld < 0 && PassIndices[idxOld] < moved.NewIndex)
+                                    idxOld++;
+                                PassIndices.Insert(idxOld, moved.NewIndex);
                                 yield return new ItemsAddedUpdateAction<int>(
-                                    idx, Collection.Single(moved.NewIndex),
+                                    idxOld, Collection.Single(moved.NewIndex),
                                         PassIndices.Count - 1
                                 );
                             }
@@ -227,3 +262,4 @@ class WhereIndexCondition<T> : CollectionUpdateEvent<int>, IUpdateReadOnlyCollec
         src.ItemsChanged -= Src_ItemsChanged;
     }
 }
+readonly record struct IndexConditionItemUpdate<T>(int Index, T OldItem, T NewItem) : IUpdateAction<int>;

@@ -1,9 +1,9 @@
 using Get.Data.Collections.Implementation;
 
 namespace Get.Data.Collections.Update;
-public interface IUpdateCollection<T> : IUpdateFixedSizeCollection<T>, IGDCollection<T>, ICollectionUpdateEvent<T>, IClearImplGDCollection<T>
+public interface IUpdateCollection<T> : IUpdateFixedSizeCollection<T>, IGDCollection<T>, ICollectionUpdateEvent<T>, IClearImplGDCollection<T>, IMoveImplGDCollection<T>
 {
-    void Move(int index1, int index2);
+    
 }
 public interface IUpdateFixedSizeCollection<T> : IUpdateReadOnlyCollection<T>, IGDFixedSizeCollection<T>, ICollectionUpdateEvent<T>
 {

@@ -1,12 +1,18 @@
 ﻿using Get.Data.Bindings;
+using System.Diagnostics;
 using System.Runtime.CompilerServices;
 
 namespace Get.Data.Properties;
 
 public delegate void ValueChangingHandler<T>(T oldValue, T newValue);
 public delegate void ValueChangedHandler<T>(T oldValue, T newValue);
-public abstract class PropertyBase<T> : IBinding<T>
+public abstract class PropertyBase<T> : IProperty<T>
 {
+#if DEBUG
+    public string DebugName { get; set; } = $"Property<{typeof(T).Name}>";
+    public bool BreakOnSet { get; set; } = false;
+    public override string ToString() => DebugName;
+#endif
     public abstract T Value { get; set; }
     T IDataBinding<T>.CurrentValue { get => Value; set => Value = value; }
 
@@ -69,7 +75,7 @@ public abstract class PropertyBase<T> : IBinding<T>
                 break;
         }
     }
-
+    void IReadOnlyProperty<T>.BindOneWayToSource(IBinding<T> binding) => Bind(binding, BindingModes.OneWayToSource);
     private void BindingRootChanged()
     {
         if (currentBinding != null)
@@ -86,16 +92,52 @@ public abstract class PropertyBase<T> : IBinding<T>
             readWriteBinding.CurrentValue = newVal;
     }
 }
-public class ReadOnlyProperty<T>(PropertyBase<T> prop) : PropertyBase<T>
+public abstract class ReadOnlyPropertyImpl<T> : IReadOnlyProperty<T>
 {
+#if DEBUG
+    public string DebugName { get; set; } = $"Property<{typeof(T).Name}>";
+    public override string ToString() => DebugName;
+#endif
+    public abstract T Value { get; }
+    
+    T IReadOnlyDataBinding<T>.CurrentValue => Value;
+
+    public abstract event ValueChangingHandler<T>? ValueChanging;
+    public abstract event ValueChangedHandler<T>? ValueChanged;
+    IReadOnlyBinding<T>? currentBinding;
+
+    // RootChanged event will never be sent
+    event Action INotifyBinding<T>.RootChanged
+    {
+        add { }
+        remove { }
+    }
+    
+    public void BindOneWayToSource(IBinding<T> binding)
+    {
+        if (currentBinding is not null)
+        {
+            ValueChanged -= ValueChangedToSourceBinding;
+        }
+        currentBinding = binding;
+        binding.CurrentValue = Value;
+        ValueChanged += ValueChangedToSourceBinding;
+    }
+    void ValueChangedToSourceBinding(T oldVal, T newVal)
+    {
+        if (currentBinding != null && currentBinding is IBinding<T> readWriteBinding)
+            readWriteBinding.CurrentValue = newVal;
+    }
+}
+public class ReadOnlyProperty<T>(PropertyBase<T> prop) : ReadOnlyPropertyImpl<T>
+{
+    public ReadOnlyProperty(T value) : this(new Property<T>(value)) { }
     public override T Value {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         get => prop.Value;
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        set => throw new InvalidOperationException("This value cannot be set");
     }
 
-    public override event ValueChangingHandler<T> ValueChanging
+    public override event ValueChangingHandler<T>? ValueChanging
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         add => prop.ValueChanging += value;
@@ -103,7 +145,7 @@ public class ReadOnlyProperty<T>(PropertyBase<T> prop) : PropertyBase<T>
         remove => prop.ValueChanging -= value;
     }
 
-    public override event ValueChangedHandler<T> ValueChanged
+    public override event ValueChangedHandler<T>? ValueChanged
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         add => prop.ValueChanged += value;
@@ -119,6 +161,9 @@ public class Property<T>(T defaultValue) : PropertyBase<T>
         get => val;
         set
         {
+#if DEBUG
+            if (BreakOnSet) Debugger.Break();
+#endif
             if (EqualityComparer<T>.Default.Equals(val, value))
                 return;
             var oldValue = val;

@@ -23,8 +23,8 @@ public class SpanFixedRegionUpdateBase<T>(IUpdateReadOnlyCollection<T> src, int 
                 case ItemsAddedUpdateAction<T> added:
                     if (added.StartingIndex >= Offset && added.StartingIndex - Offset < Length)
                         yield return new ItemsAddedUpdateAction<T>(
-                            added.StartingIndex + Offset,
-                            added.Items.Span(0..(added.StartingIndex + Math.Min(Length - added.StartingIndex, added.Items.Count))),
+                            added.StartingIndex - Offset,
+                            added.Items.Span(0..(Math.Min(Length - (added.StartingIndex - Offset), added.Items.Count))),
                             Math.Min(Length, Math.Max(0, added.OldCollectionCount - Offset))
                         );
                     else if (added.StartingIndex < Offset)
@@ -92,8 +92,8 @@ public class SpanFixedRegionUpdateBase<T>(IUpdateReadOnlyCollection<T> src, int 
                 case ItemsRemovedUpdateAction<T> removed:
                     if (removed.StartingIndex >= Offset && removed.StartingIndex - Offset < Length)
                         yield return new ItemsRemovedUpdateAction<T>(
-                            removed.StartingIndex + Offset,
-                            removed.Items.Span(0..(removed.StartingIndex + Math.Min(Length - removed.StartingIndex, removed.Items.Count))),
+                            removed.StartingIndex - Offset,
+                            removed.Items.Span(0..(Math.Min(Length - (removed.StartingIndex - Offset), removed.Items.Count))),
                             Math.Min(Length, Math.Max(0, removed.OldCollectionCount - Offset))
                         );
                     else if (removed.StartingIndex < Offset)
@@ -142,4 +142,12 @@ public class SpanFixedRegionUpdateBase<T>(IUpdateReadOnlyCollection<T> src, int 
         => src.ItemsChanged += Src_ItemsChanged;
     protected override void UnregisterItemsChangedEvent()
         => src.ItemsChanged -= Src_ItemsChanged;
+
+
+#if DEBUG
+    public override string ToString()
+    {
+        return $"{src} > Span";
+    }
+#endif
 }

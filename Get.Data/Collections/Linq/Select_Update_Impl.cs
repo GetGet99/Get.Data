@@ -29,4 +29,10 @@ abstract class SelectUpdateBase<TSrc, TDest>(IUpdateReadOnlyCollection<TSrc> src
                 ),
             _ => throw new InvalidCastException()
         })));
+#if DEBUG
+    public override string ToString()
+    {
+        return $"{src} > Select";
+    }
+#endif
 }

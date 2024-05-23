@@ -51,4 +51,10 @@ abstract class SelectBase<TIn, TOut>(IReadOnlyBinding<TIn> inBinding, ForwardCon
     {
         inBinding.RootChanged -= InvokeRootChanged;
     }
+#if DEBUG
+    public override string ToString()
+    {
+        return $"{inBinding} > Select";
+    }
+#endif
 }

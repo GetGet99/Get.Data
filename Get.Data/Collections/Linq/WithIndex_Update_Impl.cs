@@ -75,4 +75,10 @@ abstract class WithIndexUpdateBase<T>(IUpdateReadOnlyCollection<T> src) : Collec
             }
         }
     }
+#if DEBUG
+    public override string ToString()
+    {
+        return $"{src} > WithIndex";
+    }
+#endif
 }

@@ -69,8 +69,7 @@ public abstract class UpdateCollectionModelLinker<TSource, TDest> : IDisposable
                 case ItemsMovedUpdateAction<TSource> moved:
                     if (SourceUpdateCollection.Count != DestinationList.Count)
                         goto Reset;
-                    (DestinationList[moved.OldIndex], DestinationList[moved.NewIndex]) =
-                        (DestinationList[moved.NewIndex], DestinationList[moved.OldIndex]);
+                    DestinationList.Move(moved.OldIndex, moved.NewIndex);
                     break;
                 case ItemsReplacedUpdateAction<TSource> replaced:
                     if (SourceUpdateCollection.Count != DestinationList.Count)
@@ -92,7 +91,8 @@ public abstract class UpdateCollectionModelLinker<TSource, TDest> : IDisposable
         var oldDestItem = DestinationList[idx];
         if (!TryInplaceUpdate(newSrcItem, DestinationList[idx]))
         {
-            DestinationList[idx] = GetNewDest(newSrcItem);
+            var newDest = GetNewDest(newSrcItem);
+            DestinationList[idx] = newDest;
             AfterItemAdded(newSrcItem, DestinationList[idx]);
             MarkedRemovedFromDestination(oldDestItem);
         }

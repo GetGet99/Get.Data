@@ -23,4 +23,10 @@ abstract class ReverseUpdateBase<T>(IUpdateReadOnlyCollection<T> src) : Collecti
                 _ => throw new InvalidCastException()
             })));
     }
+#if DEBUG
+    public override string ToString()
+    {
+        return $"{src} > Reverse";
+    }
+#endif
 }

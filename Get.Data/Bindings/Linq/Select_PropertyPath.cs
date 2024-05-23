@@ -8,7 +8,9 @@ partial class Extension
         => new SelectPropertyPath<TSrc, TDest>(src, pDef);
 }
 class SelectPropertyPath<TOwner, TOut>(IReadOnlyBinding<TOwner> bindingOwner, IPropertyDefinition<TOwner, TOut> pDef) :
-    SelectPropertyPathBase<TOwner, TOut>(bindingOwner, pDef), IBinding<TOut>
+    SelectPropertyPathBase<TOwner, TOut, IProperty<TOut>, IPropertyDefinition<TOwner, TOut>>(bindingOwner, pDef), IBinding<TOut>
 {
-    public TOut CurrentValue { get => currentProperty.Value; set => currentProperty.Value = value; }
+    public TOut CurrentValue { get => currentProperty.CurrentValue; set => currentProperty.CurrentValue = value; }
+    protected override IProperty<TOut> GetProperty(IPropertyDefinition<TOwner, TOut> pdef, TOwner owner)
+        => pdef.GetProperty(owner);
 }

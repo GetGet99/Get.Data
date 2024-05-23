@@ -62,4 +62,10 @@ class ZipBase<TIn1, TIn2, TOut>(IReadOnlyBinding<TIn1> inBinding1, IReadOnlyBind
         inBinding1.RootChanged -= InvokeRootChanged;
         inBinding2.RootChanged -= InvokeRootChanged;
     }
+#if DEBUG
+    public override string ToString()
+    {
+        return $"{inBinding1} > Zip({inBinding2})";
+    }
+#endif
 }

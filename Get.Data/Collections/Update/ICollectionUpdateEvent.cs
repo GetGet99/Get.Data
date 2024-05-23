@@ -5,33 +5,14 @@ public interface ICollectionUpdateEvent<T>
 {
     event UpdateCollectionItemsChanged<T> ItemsChanged;
 }
-public enum UpdateKinds
-{
-    Added,
-    Removed,
-    Replaced,
-    Moved
-}
 public interface IUpdateAction<T>
 {
-    UpdateKinds UpdateKind { get; }
+    
 }
-public readonly record struct ItemsAddedUpdateAction<T>(int StartingIndex, IGDReadOnlyCollection<T> Items, int OldCollectionCount) : IUpdateAction<T>
-{
-    public UpdateKinds UpdateKind => UpdateKinds.Added;
-}
-public readonly record struct ItemsRemovedUpdateAction<T>(int StartingIndex, IGDReadOnlyCollection<T> Items, int OldCollectionCount) : IUpdateAction<T>
-{
-    public UpdateKinds UpdateKind => UpdateKinds.Removed;
-}
-public readonly record struct ItemsReplacedUpdateAction<T>(int Index, T OldItem, T NewItem) : IUpdateAction<T>
-{
-    public UpdateKinds UpdateKind => UpdateKinds.Replaced;
-}
-public readonly record struct ItemsMovedUpdateAction<T>(int OldIndex, int NewIndex, T OldIndexItem, T NewIndexItem) : IUpdateAction<T>
-{
-    public UpdateKinds UpdateKind => UpdateKinds.Replaced;
-}
+public readonly record struct ItemsAddedUpdateAction<T>(int StartingIndex, IGDReadOnlyCollection<T> Items, int OldCollectionCount) : IUpdateAction<T>;
+public readonly record struct ItemsRemovedUpdateAction<T>(int StartingIndex, IGDReadOnlyCollection<T> Items, int OldCollectionCount) : IUpdateAction<T>;
+public readonly record struct ItemsReplacedUpdateAction<T>(int Index, T OldItem, T NewItem) : IUpdateAction<T>;
+public readonly record struct ItemsMovedUpdateAction<T>(int OldIndex, int NewIndex, T OldIndexItem, T NewIndexItem) : IUpdateAction<T>;
 
 public delegate void UpdateCollectionItemsChanged<T>(IEnumerable<IUpdateAction<T>> actions);
 

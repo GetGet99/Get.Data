@@ -2,7 +2,7 @@ using Get.Data.Collections.Update;
 using Get.Data.Properties;
 
 namespace Get.Data.Bindings.Linq;
-class SelectPropertyPathBase<TOwner, TOut>(IReadOnlyBinding<TOwner> bindingOwner, IPropertyDefinition<TOwner, TOut> pDef) : BindingNotifyBase<TOut>
+abstract class SelectPropertyPathBase<TOwner, TOut, TProp, TPropDef>(IReadOnlyBinding<TOwner> bindingOwner, TPropDef pDef) : BindingNotifyBase<TOut> where TProp : IReadOnlyProperty<TOut>
 {
     TOwner owner = bindingOwner.CurrentValue;
     void SetData(TOwner newOwner)
@@ -11,9 +11,9 @@ class SelectPropertyPathBase<TOwner, TOut>(IReadOnlyBinding<TOwner> bindingOwner
             return;
         UnregisterValueChangingEvents();
         UnregisterValueChangedEvents();
-        var oldValue = currentProperty.Value;
-        var newProperty = pDef.GetProperty(newOwner);
-        var newValue = newProperty.Value;
+        var oldValue = currentProperty.CurrentValue;
+        var newProperty = GetProperty(pDef, newOwner);
+        var newValue = newProperty.CurrentValue;
         InvokeValueChanging(oldValue, newValue);
         owner = newOwner;
         currentProperty = newProperty;
@@ -21,13 +21,19 @@ class SelectPropertyPathBase<TOwner, TOut>(IReadOnlyBinding<TOwner> bindingOwner
         RegisterValueChangingEventsIfNeeded();
         RegisterValueChangedEventsIfNeeded();
     }
-    protected PropertyBase<TOut> currentProperty = pDef.GetProperty(bindingOwner.CurrentValue);
+    protected TProp currentProperty;
+    protected override void OnInitialize()
+    {
+        base.OnInitialize();
+        currentProperty = GetProperty(pDef, bindingOwner.CurrentValue);
+    }
     protected override void RegisterValueChangedEvents()
     {
         currentProperty.ValueChanged += InvokeValueChanged;
         bindingOwner.ValueChanged += InitialOwner_ValueChanged;
         SetData(bindingOwner.CurrentValue);
     }
+    protected abstract TProp GetProperty(TPropDef pdef, TOwner owner);
 
     private void InitialOwner_ValueChanged(TOwner oldValue, TOwner newValue)
     {
@@ -56,4 +62,10 @@ class SelectPropertyPathBase<TOwner, TOut>(IReadOnlyBinding<TOwner> bindingOwner
     {
         bindingOwner.RootChanged -= InvokeRootChanged;
     }
+#if DEBUG
+    public override string ToString()
+    {
+        return $"{bindingOwner} > SelectPropertyPath";
+    }
+#endif
 }

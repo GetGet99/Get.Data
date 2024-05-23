@@ -3,6 +3,8 @@ using Get.Data.Properties;
 
 public abstract class BindingNotifyBase<TOut> : INotifyBinding<TOut>
 {
+    public BindingNotifyBase() => OnInitialize();
+    protected virtual void OnInitialize() { }
     Action? _RootChanged;
     ValueChangingHandler<TOut>? _ValueChanging;
     ValueChangedHandler<TOut>? _ValueChanged;

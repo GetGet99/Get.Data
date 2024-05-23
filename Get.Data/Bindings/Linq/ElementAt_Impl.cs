@@ -51,5 +51,11 @@ abstract class ElementAtBase<TOut>(IUpdateReadOnlyCollection<TOut> collection, I
     protected override void RegisterRootChangedEvents() { }
 
     protected override void UnregisterRootChangedEvents() { }
+#if DEBUG
+    public override string ToString()
+    {
+        return $"{collection} > [Binding] ElementAt";
+    }
+#endif
 
 }

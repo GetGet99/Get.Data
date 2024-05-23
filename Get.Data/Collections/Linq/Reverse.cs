@@ -12,15 +12,15 @@ readonly struct Reverse<T>(IGDCollection<T> c) : IGDCollection<T>
     public int Count => c.Count;
     public T this[int index] { get => c[RealIndexAt(index)]; set => c[RealIndexAt(index)] = value; }
 
-    public void Insert(int index, T item)
+    public void Insert(int index, T value)
     {
         if (c.Count == 0 || index == c.Count)
         {
-            c.Insert(0, item);
+            c.Insert(0, value);
         }
         else
         {
-            c.Insert(RealIndexAt(index), item);
+            c.Insert(c.Count - index, value);
         }
     }
     public void RemoveAt(int index) => c.RemoveAt(RealIndexAt(index));

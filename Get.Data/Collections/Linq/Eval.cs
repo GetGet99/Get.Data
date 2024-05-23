@@ -9,7 +9,7 @@ public static partial class Extension
         List<T> values = new(c.Count);
         for (int i = 0; i < c.Count; i++)
         {
-            values[i] = c[i];
+            values.Add(c[i]);
         }
         return values;
     }

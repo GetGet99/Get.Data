@@ -2,6 +2,7 @@ using Get.Data.Collections.Linq;
 using Get.Data.Collections.Update;
 using Get.Data.Properties;
 using System.Collections;
+using System.Collections.ObjectModel;
 
 namespace Get.Data.Collections;
 
@@ -145,4 +146,10 @@ public abstract class UpdateCollectionPropertyBase<T, TCollection> : Property<TC
     public IEnumerator<T> GetEnumerator() => currentValue.AsEnumerable().GetEnumerator();
 
     IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+#if DEBUG
+    public override string ToString()
+    {
+        return $"{CurrentValue} > [Property]";
+    }
+#endif
 }

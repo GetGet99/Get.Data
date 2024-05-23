@@ -1,31 +1,17 @@
 ﻿namespace Get.Data.Properties;
-public interface IPropertyDefinition<TOwnerType, TPropertyType>
+
+
+public sealed class PropertyDefinition<TOwnerType, TPropertyType>(Func<TOwnerType, IProperty<TPropertyType>> getProperty) : IPropertyDefinition<TOwnerType, TPropertyType>
 {
-    PropertyBase<TPropertyType> GetProperty(TOwnerType owner);
+    public IProperty<TPropertyType> GetProperty(TOwnerType owner)
+        => getProperty(owner);
+    IReadOnlyProperty<TPropertyType>
+        IReadOnlyPropertyDefinition<TOwnerType, TPropertyType>.GetProperty(TOwnerType owner)
+        => GetProperty(owner);
 }
-public abstract class PropertyDefinitionBase<TOwnerType, TPropertyType> : IPropertyDefinition<TOwnerType, TPropertyType>
+public sealed class ReadOnlyPropertyDefinition<TOwnerType, TPropertyType>(Func<TOwnerType, IReadOnlyProperty<TPropertyType>> getProperty) : IReadOnlyPropertyDefinition<TOwnerType, TPropertyType>
 {
-    public abstract PropertyBase<TPropertyType> GetProperty(TOwnerType owner);
-
-    public PropertyDefinition<TNewOwnerType, TPropertyType> As<TNewOwnerType>() where TNewOwnerType : TOwnerType
-        => new(x => GetProperty(x));
-
-    public PropertyDefinition<TNewOwnerType, TPropertyType> As<TNewOwnerType>(Func<TNewOwnerType, TOwnerType> caster)
-        => new(x => GetProperty(caster(x)));
-
-    public PropertyDefinition<TOwnerType, TNewPropertyType> WithConverter<TNewPropertyType>(Func<TPropertyType, TNewPropertyType> forwardConvert)
-        => new(
-            x => new PropertyWithConverter<TPropertyType, TNewPropertyType>(GetProperty(x), forwardConvert)
-        );
-    public PropertyDefinition<TOwnerType, TNewPropertyType> WithConverter<TNewPropertyType>(Func<TPropertyType, TNewPropertyType> forwardConvert, Func<TNewPropertyType, TPropertyType> backwardConvert)
-        => new(
-            x => new PropertyWithConverter<TPropertyType, TNewPropertyType>(GetProperty(x), forwardConvert, backwardConvert)
-        );
-}
-
-public sealed class PropertyDefinition<TOwnerType, TPropertyType>(Func<TOwnerType, PropertyBase<TPropertyType>> getProperty) : PropertyDefinitionBase<TOwnerType, TPropertyType>
-{
-    public override PropertyBase<TPropertyType> GetProperty(TOwnerType owner)
+    public IReadOnlyProperty<TPropertyType> GetProperty(TOwnerType owner)
         => getProperty(owner);
 }
 public static class PropertyDefinition
@@ -39,4 +25,24 @@ public static class PropertyDefinition
         {
             if (writebackCondition()) setter(x, y);
         }, automaticNotifyOnSetValue: automaticNotifyOnSetValue);
+}
+public static class PropertyDefinitionExtension
+{
+    public static IPropertyDefinition<TNewOwnerType, TPropertyType> As<TOwnerType, TPropertyType, TNewOwnerType>(this IPropertyDefinition<TOwnerType, TPropertyType> pDef) where TNewOwnerType : TOwnerType
+        => new PropertyDefinition<TNewOwnerType, TPropertyType>(x => pDef.GetProperty(x));
+    public static IPropertyDefinition<TNewOwnerType, TPropertyType> As<TOwnerType, TPropertyType, TNewOwnerType>(this IPropertyDefinition<TOwnerType, TPropertyType> pDef, Func<TNewOwnerType, TOwnerType> caster)
+        => new PropertyDefinition<TNewOwnerType, TPropertyType>(x => pDef.GetProperty(caster(x)));
+    public static IReadOnlyPropertyDefinition<TNewOwnerType, TPropertyType> As<TOwnerType, TPropertyType, TNewOwnerType>(this IReadOnlyPropertyDefinition<TOwnerType, TPropertyType> pDef) where TNewOwnerType : TOwnerType
+        => new ReadOnlyPropertyDefinition<TNewOwnerType, TPropertyType>(x => pDef.GetProperty(x));
+    public static IReadOnlyPropertyDefinition<TNewOwnerType, TPropertyType> As<TOwnerType, TPropertyType, TNewOwnerType>(this IReadOnlyPropertyDefinition<TOwnerType, TPropertyType> pDef, Func<TNewOwnerType, TOwnerType> caster)
+        => new ReadOnlyPropertyDefinition<TNewOwnerType, TPropertyType>(x => pDef.GetProperty(caster(x)));
+
+    //public PropertyDefinition<TOwnerType, TNewPropertyType> WithConverter<TNewPropertyType>(Func<TPropertyType, TNewPropertyType> forwardConvert)
+    //    => new(
+    //        x => new PropertyWithConverter<TPropertyType, TNewPropertyType>(GetProperty(x), forwardConvert)
+    //    );
+    //public PropertyDefinition<TOwnerType, TNewPropertyType> WithConverter<TNewPropertyType>(Func<TPropertyType, TNewPropertyType> forwardConvert, Func<TNewPropertyType, TPropertyType> backwardConvert)
+    //    => new(
+    //        x => new PropertyWithConverter<TPropertyType, TNewPropertyType>(GetProperty(x), forwardConvert, backwardConvert)
+    //    );
 }
