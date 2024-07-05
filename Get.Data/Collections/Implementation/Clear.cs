@@ -3,7 +3,7 @@ using Get.Data.Collections.Implementation;
 
 namespace Get.Data.Collections.Implementation
 {
-    public interface IClearImplGDCollection<T> : IGDCollection<T>
+    public interface IClearImplGDCollection
     {
         void Clear();
     }
@@ -14,7 +14,7 @@ namespace Get.Data.Collections
     {
         public static void Clear<T>(this IGDCollection<T> collection)
         {
-            if (collection is IClearImplGDCollection<T> impl)
+            if (collection is IClearImplGDCollection impl)
                 impl.Clear();
             else
                 Implementations.Clear_RemoveLast(collection);

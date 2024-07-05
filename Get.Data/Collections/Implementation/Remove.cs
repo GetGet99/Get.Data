@@ -1,13 +1,25 @@
 #nullable enable
-namespace Get.Data.Collections;
+using Get.Data.Collections.Implementation;
 
-partial class DefaultImplementations
+namespace Get.Data.Collections
 {
-    public static bool Remove<T>(this IGDCollection<T> collection, T item)
+    partial class DefaultImplementations
     {
-        var idx = collection.IndexOf(item);
-        if (idx >= 0)
-            collection.RemoveAt(idx);
-        return idx >= 0;
+        public static bool Remove<T>(this IGDCollection<T> collection, T item)
+        {
+            if (collection is IRemoveImplGDCollection<T> remImpl) return remImpl.Remove(item);
+            var idx = collection.IndexOf(item);
+            if (idx >= 0)
+                collection.RemoveAt(idx);
+            return idx >= 0;
+        }
+    }
+}
+
+namespace Get.Data.Collections.Implementation
+{
+    public interface IRemoveImplGDCollection<T>
+    {
+        bool Remove(T item);
     }
 }

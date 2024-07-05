@@ -1,12 +1,24 @@
+using Get.Data.Bindings;
 using Get.Data.Collections.Update;
+using Get.Data.Bindings.Linq;
 
-namespace Get.Data.Bindings.Linq;
-partial class Extension
+namespace Get.Data.Bindings.Linq
 {
-    public static IReadOnlyBinding<T> ElementAt<T>(this IUpdateReadOnlyCollection<T> collection, IReadOnlyBinding<int> index)
-        => new ElementAtReadOnly<T>(collection, index);
+    partial class Extension
+    {
+        public static IReadOnlyBinding<T?> ElementAt<T>(this IUpdateReadOnlyCollection<T> collection, IReadOnlyBinding<int> index)
+            => new ElementAtReadOnly<T>(collection, index);
+    }
+    class ElementAtReadOnly<T>(IUpdateReadOnlyCollection<T> collection, IReadOnlyBinding<int> index) : ElementAtBase<T?>(collection, index), IReadOnlyBinding<T?>
+    {
+        public T? CurrentValue { get => value; }
+    }
 }
-class ElementAtReadOnly<T>(IUpdateReadOnlyCollection<T> collection, IReadOnlyBinding<int> index) : ElementAtBase<T?>(collection, index), IReadOnlyBinding<T?>
+namespace Get.Data.Collections.Linq
 {
-    public T? CurrentValue { get => value; }
+    partial struct GDUpdateReadOnlyCollectionHelper<T>
+    {
+        public IReadOnlyBinding<T?> ElementAt(IReadOnlyBinding<int> index)
+            => collection.ElementAt(index);
+    }
 }

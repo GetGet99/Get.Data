@@ -1,7 +1,7 @@
 using Get.Data.Collections.Implementation;
 
 namespace Get.Data.Collections.Update;
-public interface IUpdateCollection<T> : IUpdateFixedSizeCollection<T>, IGDCollection<T>, ICollectionUpdateEvent<T>, IClearImplGDCollection<T>, IMoveImplGDCollection<T>
+public interface IUpdateCollection<T> : IUpdateFixedSizeCollection<T>, IGDCollection<T>, ICollectionUpdateEvent<T>, IClearImplGDCollection, IMoveImplGDCollection
 {
     
 }

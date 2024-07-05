@@ -22,3 +22,8 @@ class Zip<TIn1, TIn2, TOut>(IBinding<TIn1> inBinding1, IBinding<TIn2> inBinding2
         }
     }
 }
+partial struct BindingsHelper<TSrc>
+{
+    public IReadOnlyBinding<TOut> Zip<TIn2, TOut>(IBinding<TIn2> inBinding2, ZipForwardConverter<TSrc, TIn2, TOut> converter, ZipAdvancedBackwardConverter<TSrc, TIn2, TOut> backwardConverter)
+        => binding.Zip(inBinding2, converter, backwardConverter);
+}

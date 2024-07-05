@@ -1,8 +1,12 @@
 using Get.Data.Collections;
+using Get.Data.Collections.Implementation;
 using System.Collections;
 
 namespace Get.Data.Collections.Conversion;
-readonly struct ListImpl<T>(IList<T> values) : IGDCollection<T>
+readonly struct ListImpl<T>(IList<T> values) :
+    IGDCollection<T>,
+    IRemoveImplGDCollection<T>,
+    IContainsImplGDCollection<T>, IIndexOfImplGDCollection<T>
 {
     public T this[int index]
     {
@@ -12,7 +16,13 @@ readonly struct ListImpl<T>(IList<T> values) : IGDCollection<T>
 
     public int Count => values.Count;
 
+    public bool Contains(T item) => values.Contains(item);
+
+    public int IndexOf(T item) => values.IndexOf(item);
+
     public void Insert(int index, T item) => values.Insert(index, item);
+
+    public bool Remove(T item) => values.Remove(item);
 
     public void RemoveAt(int index) => values.RemoveAt(index);
 }

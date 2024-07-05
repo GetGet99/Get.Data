@@ -14,3 +14,10 @@ class Select<TIn, TOut>(IBinding<TIn> inBinding, ForwardConverter<TIn, TOut> con
         set => inBinding.CurrentValue = backwardConverter(value, owner);
     }
 }
+partial struct BindingsHelper<TSrc>
+{
+    public IBinding<TDest> Select<TDest>(ForwardConverter<TSrc, TDest> forwardConverter, BackwardConverter<TSrc, TDest> backwardConverter)
+        => binding.Select(forwardConverter, backwardConverter);
+    public IBinding<TDest> Select<TDest>(ForwardConverter<TSrc, TDest> forwardConverter, AdvancedBackwardConverter<TSrc, TDest> backwardConverter)
+        => binding.Select(forwardConverter, backwardConverter);
+}

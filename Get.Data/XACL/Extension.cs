@@ -250,6 +250,13 @@ public class GenericBindingKinds<TOwner> : IEnumerable
             propertyDefinition.GetProperty(x).Bind(binding, bm);
         };
     }
+    public void Add<TProp>(Func<TOwner, IProperty<TProp>> propertyDefinition, IBinding<TProp> binding)
+    {
+        setBinding += (x, bm) =>
+        {
+            propertyDefinition(x).Bind(binding, bm);
+        };
+    }
     public void ApplyTo(TOwner owner, BindingModes bindingModes) => setBinding?.Invoke(owner, bindingModes);
 
     IEnumerator IEnumerable.GetEnumerator()
@@ -266,6 +273,13 @@ public class GenericReadOnlyBindingKinds<TOwner> : IEnumerable
         setBinding += (x, bm) =>
         {
             propertyDefinition.GetProperty(x).Bind(binding, bm);
+        };
+    }
+    public void Add<TProp>(Func<TOwner, IProperty<TProp>> propertyDefinition, IReadOnlyBinding<TProp> binding)
+    {
+        setBinding += (x, bm) =>
+        {
+            propertyDefinition(x).Bind(binding, bm);
         };
     }
     public void ApplyTo(TOwner owner, ReadOnlyBindingModes bindingModes) => setBinding?.Invoke(owner, bindingModes);

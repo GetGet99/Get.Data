@@ -15,3 +15,8 @@ class SelectPropertyPathReadOnly<TOwner, TOut>(IReadOnlyBinding<TOwner> bindingO
     protected override IReadOnlyProperty<TOut> GetProperty(IReadOnlyPropertyDefinition<TOwner, TOut> pdef, TOwner owner)
         => pdef.GetProperty(owner);
 }
+partial struct ReadOnlyBindingsHelper<TSrc>
+{
+    public IReadOnlyBinding<TDest> Select<TDest>(IReadOnlyPropertyDefinition<TSrc, TDest> pDef)
+        => binding.Select(pDef);
+}

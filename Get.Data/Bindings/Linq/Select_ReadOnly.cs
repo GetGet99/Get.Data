@@ -1,5 +1,3 @@
-using Get.Data.Collections.Update;
-
 namespace Get.Data.Bindings.Linq;
 partial class Extension
 {
@@ -9,4 +7,15 @@ partial class Extension
 class SelectReadOnly<TIn, TOut>(IReadOnlyBinding<TIn> inBinding, ForwardConverter<TIn, TOut> converter) : SelectBase<TIn, TOut>(inBinding, converter), IReadOnlyBinding<TOut>
 {
     public TOut CurrentValue => _value;
+}
+partial struct ReadOnlyBindingsHelper<TSrc>
+{
+    public IReadOnlyBinding<TDest> Select<TDest>(ForwardConverter<TSrc, TDest> forwardConverter)
+        => binding.Select(forwardConverter);
+}
+partial struct BindingsHelper<TSrc>
+{
+    // Select is often used, so make it for binding as well
+    public IReadOnlyBinding<TOut> Select<TOut>(ForwardConverter<TSrc, TOut> forwardConverter)
+        => binding.Select(forwardConverter);
 }

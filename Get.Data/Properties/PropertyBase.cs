@@ -31,11 +31,7 @@ public abstract class PropertyBase<T> : IProperty<T>
 
     public void Bind(IReadOnlyBinding<T> binding, ReadOnlyBindingModes bindingMode)
     {
-        if (currentBinding is not null)
-        {
-            ValueChanged -= ValueChangedToSourceBinding;
-            currentBinding.ValueChanged -= SourceBindingValueChanged;
-        }
+        RemoveBinding();
         currentBinding = binding;
         switch (bindingMode)
         {
@@ -51,11 +47,7 @@ public abstract class PropertyBase<T> : IProperty<T>
     }
     public void Bind(IBinding<T> binding, BindingModes bindingMode)
     {
-        if (currentBinding is not null)
-        {
-            ValueChanged -= ValueChangedToSourceBinding;
-            currentBinding.ValueChanged -= SourceBindingValueChanged;
-        }
+        RemoveBinding();
         currentBinding = binding;
         switch (bindingMode)
         {
@@ -91,6 +83,15 @@ public abstract class PropertyBase<T> : IProperty<T>
         if (currentBinding != null && currentBinding is IBinding<T> readWriteBinding)
             readWriteBinding.CurrentValue = newVal;
     }
+
+    public void RemoveBinding()
+    {
+        if (currentBinding is not null)
+        {
+            ValueChanged -= ValueChangedToSourceBinding;
+            currentBinding.ValueChanged -= SourceBindingValueChanged;
+        }
+    }
 }
 public abstract class ReadOnlyPropertyImpl<T> : IReadOnlyProperty<T>
 {
@@ -115,13 +116,17 @@ public abstract class ReadOnlyPropertyImpl<T> : IReadOnlyProperty<T>
     
     public void BindOneWayToSource(IBinding<T> binding)
     {
+        RemoveBinding();
+        currentBinding = binding;
+        binding.CurrentValue = Value;
+        ValueChanged += ValueChangedToSourceBinding;
+    }
+    public void RemoveBinding()
+    {
         if (currentBinding is not null)
         {
             ValueChanged -= ValueChangedToSourceBinding;
         }
-        currentBinding = binding;
-        binding.CurrentValue = Value;
-        ValueChanged += ValueChangedToSourceBinding;
     }
     void ValueChangedToSourceBinding(T oldVal, T newVal)
     {

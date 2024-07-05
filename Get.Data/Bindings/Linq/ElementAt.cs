@@ -1,21 +1,34 @@
+using Get.Data.Bindings;
+using Get.Data.Bindings.Linq;
 using Get.Data.Collections.Update;
 
-namespace Get.Data.Bindings.Linq;
-partial class Extension
+namespace Get.Data.Bindings.Linq
 {
-    public static IBinding<T> ElementAt<T>(this IUpdateFixedSizeCollection<T> collection, IReadOnlyBinding<int> index)
-        => new ElementAt<T>(collection, index);
-}
-class ElementAt<T>(IUpdateFixedSizeCollection<T> collection, IReadOnlyBinding<int> index) : ElementAtBase<T?>(collection, index), IBinding<T?>
-{
-    public T? CurrentValue {
-        get => value;
-        set
+    partial class Extension
+    {
+        public static IBinding<T?> ElementAt<T>(this IUpdateFixedSizeCollection<T> collection, IReadOnlyBinding<int> index)
+            => new ElementAt<T>(collection, index);
+    }
+    class ElementAt<T>(IUpdateFixedSizeCollection<T> collection, IReadOnlyBinding<int> index) : ElementAtBase<T?>(collection, index), IBinding<T?>
+    {
+        public T? CurrentValue
         {
-            var curIdx = index.CurrentValue;
-            if (curIdx < 0 || curIdx >= collection.Count)
-                throw new InvalidOperationException("Invalid Index");
-            collection[index.CurrentValue] = value;
+            get => value;
+            set
+            {
+                var curIdx = index.CurrentValue;
+                if (curIdx < 0 || curIdx >= collection.Count)
+                    throw new InvalidOperationException("Invalid Index");
+                collection[index.CurrentValue] = value;
+            }
         }
+    }
+}
+namespace Get.Data.Collections.Linq
+{
+    partial struct GDUpdateFixedSizeCollectionHelper<T>
+    {
+        public IBinding<T?> ElementAt(IReadOnlyBinding<int> index)
+            => collection.ElementAt(index);
     }
 }

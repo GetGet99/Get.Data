@@ -9,3 +9,8 @@ class SelectPathReadOnly<TSrc, TDest>(IReadOnlyBinding<TSrc> src, Func<TSrc, IRe
 {
     public TDest CurrentValue { get => currentBinding is null ? default! : currentBinding.CurrentValue; }
 }
+partial struct ReadOnlyBindingsHelper<TSrc>
+{
+    public IReadOnlyBinding<TDest> SelectPath<TDest>(Func<TSrc, IReadOnlyBinding<TDest>> selector)
+        => binding.SelectPath(selector);
+}
