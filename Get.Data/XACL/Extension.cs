@@ -10,7 +10,7 @@ using Get.Data.DataTemplates;
 
 namespace Get.Data.XACL;
 interface ICollectionItemsBinding<TTarget> { }
-public record class CollectionItemsBinding<TSrc, TTarget>(IUpdateReadOnlyCollection<TSrc> Source, DataTemplate<TSrc, TTarget> DataTemplate) : ICollectionItemsBinding<TTarget>
+public record class CollectionItemsBinding<TSrc, TTarget>(IUpdateReadOnlyCollection<TSrc> Source, IDataTemplate<TSrc, TTarget> DataTemplate) : ICollectionItemsBinding<TTarget>
 {
 
 }
@@ -21,7 +21,7 @@ public record class CollectionItemsBinding<T>(IUpdateReadOnlyCollection<T> Sourc
 public static class CollectionItemsBinding
 {
     public static CollectionItemsBinding<T> Create<T>(IUpdateReadOnlyCollection<T> Source) => new(Source);
-    public static CollectionItemsBinding<TSrc, TTarget> Create<TSrc, TTarget>(IUpdateReadOnlyCollection<TSrc> Source, DataTemplate<TSrc, TTarget> DataTemplate) => new(Source, DataTemplate);
+    public static CollectionItemsBinding<TSrc, TTarget> Create<TSrc, TTarget>(IUpdateReadOnlyCollection<TSrc> Source, IDataTemplate<TSrc, TTarget> DataTemplate) => new(Source, DataTemplate);
 }
 public static class XACLExtension
 {
@@ -36,7 +36,7 @@ public static class XACLExtension
         toBind.Source.Select(x => (TTarget)x).Bind(collection.AsGDCollection());
     }
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static void Add<TSrc, TTarget>(this IList<TTarget> collection, IUpdateReadOnlyCollection<TSrc> source, DataTemplate<TSrc, TTarget> dataTemplate)
+    public static void Add<TSrc, TTarget>(this IList<TTarget> collection, IUpdateReadOnlyCollection<TSrc> source, IDataTemplate<TSrc, TTarget> dataTemplate)
     {
         source.Bind(collection.AsGDCollection(), dataTemplate);
     }
@@ -56,7 +56,7 @@ public static class XACLExtension
         toBind.Source.Select(x => (TTarget)x).Bind(collection);
     }
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static void Add<TSrc, TTarget>(this IGDCollection<TTarget> collection, IUpdateReadOnlyCollection<TSrc> source, DataTemplate<TSrc, TTarget> dataTemplate)
+    public static void Add<TSrc, TTarget>(this IGDCollection<TTarget> collection, IUpdateReadOnlyCollection<TSrc> source, IDataTemplate<TSrc, TTarget> dataTemplate)
     {
         source.Bind(collection, dataTemplate);
     }
@@ -158,6 +158,14 @@ public static class XACLExtension
     public static XACLSyntaxHelper<TSrc> XACL<TSrc>(this TSrc source)
     {
         return new XACLSyntaxHelper<TSrc>(source);
+    }
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static IDisposable RegisterUpdateTarget<T>(this IReadOnlyBinding<T> src, Action<T> target)
+    {
+        void handler(T _, T val) => target(val);
+        src.ValueChanged += handler;
+        target(src.CurrentValue);
+        return new Disposable(() => src.ValueChanged -= handler);
     }
 }
 public class XACLSyntaxHelper<TSrc>(TSrc src)

@@ -9,11 +9,11 @@ namespace Get.Data.ObservableCollection.Bindings;
 
 public class CollectionBinder
 {
-    public static IDisposable Bind<TSrc, TOut>(ObservableCollection<TSrc> collection, IList<TOut> @out, DataTemplate<TSrc, TOut> dataTemplate)
+    public static IDisposable Bind<TSrc, TOut>(ObservableCollection<TSrc> collection, IList<TOut> @out, IDataTemplate<TSrc, TOut> dataTemplate)
         => Bind<ObservableCollection<TSrc>, TSrc, TOut>(collection, @out, dataTemplate);
-    public static IDisposable Bind<TSrcCollection, TSrc, TOut>(TSrcCollection collection, IList<TOut> @out, DataTemplate<TSrc, TOut> dataTemplate) where TSrcCollection : INotifyCollectionChanged, IReadOnlyList<TSrc>
+    public static IDisposable Bind<TSrcCollection, TSrc, TOut>(TSrcCollection collection, IList<TOut> @out, IDataTemplate<TSrc, TOut> dataTemplate) where TSrcCollection : INotifyCollectionChanged, IReadOnlyList<TSrc>
     {
-        ObservableCollection<DataTemplateGeneratedValue<TSrc, TOut>> middleCollection = [];
+        ObservableCollection<IDataTemplateGeneratedValue<TSrc, TOut>> middleCollection = [];
         var a = new TemplateLinker<TSrcCollection, TSrc, TOut>(collection, middleCollection, dataTemplate);
         var b = new RefRemover<TSrc, TOut>(middleCollection, @out);
         a.ResetAndReadd();
@@ -24,7 +24,7 @@ public class CollectionBinder
             b.Dispose();
         });
     }
-    public static IDisposable Bind<TSrc, TOut>(ObservableCollection<TSrc> collection, IList<TOut> @out, DataTemplate<(int Index, TSrc Value), TOut> dataTemplate)
+    public static IDisposable Bind<TSrc, TOut>(ObservableCollection<TSrc> collection, IList<TOut> @out, IDataTemplate<(int Index, TSrc Value), TOut> dataTemplate)
         => Bind(new ObservableCollectionWithIndex<TSrc>(collection), @out, dataTemplate);
     public static IDisposable Bind<T>(ObservableCollection<T> collection, IList<T> @out)
     {
@@ -49,27 +49,27 @@ public class CollectionBinder
         protected override TTarget CreateFrom(T source) => source;
     }
 }
-class TemplateLinker<TSourceCollection, TSource, TDest>(TSourceCollection source, ObservableCollection<DataTemplateGeneratedValue<TSource, TDest>> dest, DataTemplate<TSource, TDest> dataTemplate) : ObservableCollectionModelLinker<TSourceCollection, TSource, DataTemplateGeneratedValue<TSource, TDest>>(source, dest) where TSourceCollection : IReadOnlyList<TSource>, INotifyCollectionChanged
+class TemplateLinker<TSourceCollection, TSource, TDest>(TSourceCollection source, ObservableCollection<IDataTemplateGeneratedValue<TSource, TDest>> dest, IDataTemplate<TSource, TDest> dataTemplate) : ObservableCollectionModelLinker<TSourceCollection, TSource, IDataTemplateGeneratedValue<TSource, TDest>>(source, dest) where TSourceCollection : IReadOnlyList<TSource>, INotifyCollectionChanged
 {
-    protected override DataTemplateGeneratedValue<TSource, TDest> CreateFrom(TSource source)
+    protected override IDataTemplateGeneratedValue<TSource, TDest> CreateFrom(TSource source)
     {
-        return dataTemplate.Generate(source);
+        return dataTemplate.Generate(new ValueBinding<TSource>(source));
     }
-    protected override void Recycle(DataTemplateGeneratedValue<TSource, TDest> dest)
+    protected override void Recycle(IDataTemplateGeneratedValue<TSource, TDest> dest)
     {
         base.Recycle(dest);
         dest.Recycle();
     }
-    protected override bool MarkedHibernation(DataTemplateGeneratedValue<TSource, TDest> dest)
+    protected override bool MarkedHibernation(IDataTemplateGeneratedValue<TSource, TDest> dest)
     {
         return true;
     }
-    protected override bool? ReturnFromHibernation(TSource newItem, DataTemplateGeneratedValue<TSource, TDest> dest)
+    protected override bool? ReturnFromHibernation(TSource newItem, IDataTemplateGeneratedValue<TSource, TDest> dest)
     {
         dest.Binding = new ValueBinding<TSource>(newItem);
         return true;
     }
-    protected override bool TryInplaceUpdate(TSource newItem, DataTemplateGeneratedValue<TSource, TDest> currentItem)
+    protected override bool TryInplaceUpdate(TSource newItem, IDataTemplateGeneratedValue<TSource, TDest> currentItem)
     {
         currentItem.Binding = new ValueBinding<TSource>(newItem);
         return true;
@@ -139,8 +139,8 @@ class ObservableCollectionWithIndex<T> : INotifyCollectionChanged, IReadOnlyList
 //        return true;
 //    }
 //}
-class RefRemover<TSrc, TOut>(ObservableCollection<DataTemplateGeneratedValue<TSrc, TOut>> source, IList<TOut> dest) : ObservableCollectionModelLinker<DataTemplateGeneratedValue<TSrc, TOut>, TOut>(source, dest)
+class RefRemover<TSrc, TOut>(ObservableCollection<IDataTemplateGeneratedValue<TSrc, TOut>> source, IList<TOut> dest) : ObservableCollectionModelLinker<IDataTemplateGeneratedValue<TSrc, TOut>, TOut>(source, dest)
 {
-    protected override TOut CreateFrom(DataTemplateGeneratedValue<TSrc, TOut> source)
+    protected override TOut CreateFrom(IDataTemplateGeneratedValue<TSrc, TOut> source)
         => source.GeneratedValue;
 }

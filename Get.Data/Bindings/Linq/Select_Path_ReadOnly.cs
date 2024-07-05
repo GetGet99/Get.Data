@@ -7,5 +7,5 @@ partial class Extension
 class SelectPathReadOnly<TSrc, TDest>(IReadOnlyBinding<TSrc> src, Func<TSrc, IReadOnlyBinding<TDest>> selector) :
     SelectPathBase<TSrc, TDest, IReadOnlyBinding<TDest>>(src, selector), IReadOnlyBinding<TDest>
 {
-    public TDest CurrentValue { get => currentBinding.CurrentValue; }
+    public TDest CurrentValue { get => currentBinding is null ? default! : currentBinding.CurrentValue; }
 }
