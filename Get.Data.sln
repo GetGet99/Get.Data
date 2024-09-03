@@ -7,7 +7,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Get.Data", "Get.Data\Get.Da
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Get.Data.Test", "Get.Data.Test\Get.Data.Test.csproj", "{F4CF768B-6CF3-4C48-8809-49FB5E130B20}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Get.Data.SourceGenerators", "Get.Data.SourceGenerators\Get.Data.SourceGenerators.csproj", "{B9B77FE7-C349-43CB-8094-29AAAA0EBFF2}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Get.Data.SourceGenerators", "Get.Data.SourceGenerators\Get.Data.SourceGenerators.csproj", "{D6DA8E5B-9D3B-4E38-B317-F8A56196F200}"
+EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "Get.Data.Shared", "Get.Data.Shared\Get.Data.Shared.shproj", "{5F7E83D0-D6F4-43C5-8922-A11AB98B4409}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Get.EasyCSharp.GeneratorTools", "Get.EasyCSharp.GeneratorTools\Get.EasyCSharp.GeneratorTools.csproj", "{6E948585-8B75-40CE-BF5A-AF186B8ED2D2}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -23,15 +27,24 @@ Global
 		{F4CF768B-6CF3-4C48-8809-49FB5E130B20}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F4CF768B-6CF3-4C48-8809-49FB5E130B20}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F4CF768B-6CF3-4C48-8809-49FB5E130B20}.Release|Any CPU.Build.0 = Release|Any CPU
-		{B9B77FE7-C349-43CB-8094-29AAAA0EBFF2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{B9B77FE7-C349-43CB-8094-29AAAA0EBFF2}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{B9B77FE7-C349-43CB-8094-29AAAA0EBFF2}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{B9B77FE7-C349-43CB-8094-29AAAA0EBFF2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D6DA8E5B-9D3B-4E38-B317-F8A56196F200}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D6DA8E5B-9D3B-4E38-B317-F8A56196F200}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D6DA8E5B-9D3B-4E38-B317-F8A56196F200}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D6DA8E5B-9D3B-4E38-B317-F8A56196F200}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6E948585-8B75-40CE-BF5A-AF186B8ED2D2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6E948585-8B75-40CE-BF5A-AF186B8ED2D2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6E948585-8B75-40CE-BF5A-AF186B8ED2D2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6E948585-8B75-40CE-BF5A-AF186B8ED2D2}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {7B10E3FF-A7CB-403A-A71D-E2451281CD34}
+	EndGlobalSection
+	GlobalSection(SharedMSBuildProjectFiles) = preSolution
+		Get.Data.Shared\Get.Data.Shared.projitems*{5f7e83d0-d6f4-43c5-8922-a11ab98b4409}*SharedItemsImports = 13
+		Get.Data.Shared\Get.Data.Shared.projitems*{d6da8e5b-9d3b-4e38-b317-f8a56196f200}*SharedItemsImports = 5
+		Get.Data.Shared\Get.Data.Shared.projitems*{e75ec144-ce32-42d3-96ce-d433b9f89e1e}*SharedItemsImports = 5
 	EndGlobalSection
 EndGlobal

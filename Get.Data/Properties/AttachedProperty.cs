@@ -1,8 +1,10 @@
-﻿namespace Get.Data.Properties;
+﻿using Get.Data.Bindings;
+
+namespace Get.Data.Properties;
 
 public delegate void AttachedPropertyValueChangingHandler<TBindable, TProperty>(TBindable parent, TProperty oldValue, TProperty newValue);
 public delegate void AttachedPropertyValueChangedHandler<TBindable, TProperty>(TBindable parent, TProperty oldValue, TProperty newValue);
-public class AttachedPropertyDefinition<TBindable, TProperty>(TProperty defaultValue) : IPropertyDefinition<TBindable, TProperty> where TBindable : notnull
+public class AttachedProperty<TBindable, TProperty>(TProperty defaultValue) : IPropertyDefinition<TBindable, TProperty> where TBindable : notnull
 {
     public event AttachedPropertyValueChangingHandler<TBindable, TProperty>? ValueChanging;
     public event AttachedPropertyValueChangedHandler<TBindable, TProperty>? ValueChanged;
@@ -16,6 +18,33 @@ public class AttachedPropertyDefinition<TBindable, TProperty>(TProperty defaultV
             property.ValueChanged += (oldVal, newVal) => ValueChanged?.Invoke(owner, oldVal, newVal);
         }
         return property;
+    }
+
+    /// <summary>
+    /// When the property value for <paramref name="source"/> changes,
+    /// the property value for <paramref name="target"/> will be updated to match.
+    /// </summary>
+    /// <param name="source">The source item</param>
+    /// <param name="target">The target item</param>
+    /// <remarks>
+    /// If there were old binding for target, it will be replaced.
+    /// </remarks>
+    public void InheritValue(TBindable source, TBindable target)
+    {
+        GetProperty(target).BindOneWay(GetProperty(source));
+    }
+    /// <summary>
+    /// When the property value for <paramref name="source"/> changes,
+    /// the property value for <paramref name="target"/> will be updated to match.
+    /// </summary>
+    /// <param name="source">The source item</param>
+    /// <param name="target">The target item</param>
+    /// <remarks>
+    /// If there were old binding for target, it will be replaced.
+    /// </remarks>
+    public void InheritProperty(IReadOnlyBinding<TProperty> source, TBindable target)
+    {
+        GetProperty(target).BindOneWay(source);
     }
 
     /// <summary>
@@ -35,7 +64,7 @@ public class AttachedPropertyDefinition<TBindable, TProperty>(TProperty defaultV
     IReadOnlyProperty<TProperty> IReadOnlyPropertyDefinition<TBindable, TProperty>.GetProperty(TBindable owner)
         => GetProperty(owner);
 }
-public class AttachedProperty<TPropertyType>(TPropertyType defaultValue) : AttachedPropertyDefinition<object, TPropertyType>(defaultValue)
+public class AttachedProperty<TPropertyType>(TPropertyType defaultValue) : AttachedProperty<object, TPropertyType>(defaultValue)
 {
 
 }

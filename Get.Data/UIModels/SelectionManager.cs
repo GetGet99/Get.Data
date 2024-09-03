@@ -9,7 +9,7 @@ namespace Get.Data.UIModels;
 public class SelectionManager<T>
 {
     public SelectionManager() : this(new UpdateCollection<T>()) { }
-    public SelectionManager(IUpdateCollection<T> updateCollection)
+    public SelectionManager(IUpdateReadOnlyCollection<T> updateCollection)
     {
         Collection = updateCollection;
         
@@ -107,7 +107,7 @@ public class SelectionManager<T>
     public IReadOnlyProperty<T?> SelectedValueProperty { get; } // TODO: Make it not readonly once Wrapper is done
     public T? SelectedValue => SelectedValueProperty.CurrentValue;
     public Property<bool> PreferAlwaysSelectItemProperty { get; } = new(false);
-    public IUpdateCollection<T> Collection { get; }
+    public IUpdateReadOnlyCollection<T> Collection { get; }
     readonly struct Wrapper(Property<T?> SelectedValueProperty, SelectionManager<T> self) : IProperty<T?>
     {
         public T? CurrentValue {

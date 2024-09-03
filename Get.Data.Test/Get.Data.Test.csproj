@@ -8,6 +8,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Get.Data.SourceGenerators\Get.Data.SourceGenerators.csproj" ReferenceOutputAssembly="False" OutputItemType="Analyzer" />
     <ProjectReference Include="..\Get.Data\Get.Data.csproj" />
   </ItemGroup>
 

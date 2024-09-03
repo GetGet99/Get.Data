@@ -7,6 +7,7 @@
 		<LangVersion>12</LangVersion>
 		<Version>1.0.11</Version>
 		<Configurations>Debug;Release</Configurations>
+		<Platforms>AnyCPU;x64</Platforms>
 	</PropertyGroup>
 
 	<ItemGroup>
@@ -15,5 +16,7 @@
 	    <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 	  </PackageReference>
 	</ItemGroup>
+
+	<Import Project="..\Get.Data.Shared\Get.Data.Shared.projitems" Label="Shared" />
 
 </Project>
