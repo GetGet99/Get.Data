@@ -25,6 +25,8 @@ readonly record struct Variable(string VariableName) : IAssiangableExpression
     //public static implicit operator Variable(string VariableName) => new(VariableName);
     public override string ToString() => StringRepresentaion;
     public Path NullableDot(string next) => new Path($"{VariableName}?.{next}");
+    public Path ForceCast(FullType type) => new Path($"(({type}){VariableName})");
+    public Path AsCast(FullType type) => new Path($"({VariableName} as {type})");
     public Path Dot(string next) => new Path($"{VariableName}.{next}");
     public void Invoke(params IExpression[] Expressions) => Invoke(Expressions.AsEnumerable());
     public void Invoke(IEnumerable<IExpression> Expressions)

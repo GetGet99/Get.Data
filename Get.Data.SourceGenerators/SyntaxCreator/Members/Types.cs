@@ -3,7 +3,6 @@ using Microsoft.CodeAnalysis;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using EasyCSharp.GeneratorTools;
 namespace Get.EasyCSharp.GeneratorTools.SyntaxCreator.Members;
 
 interface IType : IMember

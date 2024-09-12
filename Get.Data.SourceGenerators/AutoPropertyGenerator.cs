@@ -18,7 +18,7 @@ namespace Get.EasyCSharp.Generator.PropertyGenerator;
 [AddAttributeConverter(typeof(AutoPropertyAttribute))]
 [AddAttributeConverter(typeof(PropertyNameOverrideAttribute), ParametersAsString = "\"\"")]
 [AddAttributeConverter(typeof(PropertySetEquivalentCheckAttribute), ParametersAsString = "default")]
-partial class AutoPropertyGenerator : global::EasyCSharp.GeneratorTools.AttributeBaseGenerator<
+partial class AutoPropertyGenerator : AttributeBaseGenerator<
     AutoPropertyAttribute,
     AutoPropertyGenerator.AutoPropertyAttributeWarpper,
     TypeDeclarationSyntax,
@@ -73,7 +73,8 @@ partial class AutoPropertyGenerator : global::EasyCSharp.GeneratorTools.Attribut
                     genContext, sym, AttributeDataToPropertySetEquivalentCheckAttribute
                 )?.Serialized ?? new(compilation) { CheckKinds = PropertySetEquivalentCheckKinds.Auto };
                 var propName = new Variable(sym.Name);
-                var propValueRef = propName.Dot("CurrentValue");
+                var propTypeImpl = new FullType($"{(propertyKind is 1 ? "global::Get.Data.Properties.IProperty" : "global::Get.Data.Properties.IReadOnlyProperty")}<{new FullType(innerType)}>");
+                var propValueRef = propName.ForceCast(propTypeImpl).Dot("CurrentValue");
                 yield return new Property(GetSyntaxVisiblity(sym.DeclaredAccessibility), new(innerType), propertyName)
                 {
                     Documentation = new CustomDocumentation(

@@ -44,4 +44,23 @@ public static class CollectionBindingExtension
             @out.Clear();
         });
     }
+
+    public static IDisposable Bind<TSrc, TOut>(this IUpdateReadOnlyCollection<TSrc> collection, IGDCollection<TOut> @out, Func<TSrc, TOut> createFrom
+#if DEBUG
+        , bool debug = false
+#endif
+        )
+    {
+        var a = new UpdateCollectionModelLinkerDelegate<TSrc, TOut>(collection, @out, createFrom)
+#if DEBUG
+        { DebugMode = debug }
+#endif
+        ;
+        a.ResetAndReadd();
+        return new Disposable(() =>
+        {
+            a.Dispose();
+            @out.Clear();
+        });
+    }
 }

@@ -2,6 +2,7 @@
 #nullable enable
 #pragma warning restore IDE0240
 
+using Get.EasyCSharp.GeneratorTools.SyntaxCreator.Members;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
@@ -88,7 +89,7 @@ static class Extension
     static SymbolDisplayFormat full = new(
         globalNamespaceStyle: SymbolDisplayGlobalNamespaceStyle.Included,
         typeQualificationStyle: SymbolDisplayTypeQualificationStyle.NameAndContainingTypesAndNamespaces,
-        genericsOptions: SymbolDisplayGenericsOptions.IncludeTypeParameters | SymbolDisplayGenericsOptions.IncludeTypeConstraints | SymbolDisplayGenericsOptions.IncludeVariance,
+        genericsOptions: SymbolDisplayGenericsOptions.IncludeTypeParameters | SymbolDisplayGenericsOptions.IncludeVariance,
         miscellaneousOptions: SymbolDisplayMiscellaneousOptions.ExpandNullable | SymbolDisplayMiscellaneousOptions.EscapeKeywordIdentifiers | SymbolDisplayMiscellaneousOptions.UseSpecialTypes
     );
     public static string FullName(this ITypeSymbol Symbol, bool NullableReferenceType = false)
@@ -101,6 +102,7 @@ static class Extension
             return Symbol.FullNameWithoutAnnotation() + "?";
         else
             return Symbol.FullNameWithoutAnnotation();
+        //return Symbol.WithNullableAnnotation(NullableReferenceType ? NullableAnnotation.Annotated : NullableAnnotation.None).ToString();
     }
     public static string FullNameWithoutAnnotation(this ITypeSymbol Symbol)
     {

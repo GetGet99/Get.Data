@@ -1,23 +1,84 @@
+using Get.Data.Collections.Update;
+using Get.Data.Helpers;
+
 namespace Get.Data.Bindings.Linq;
-partial class Extension
+partial class Select<TIn, TOut>
 {
-    public static IBinding<TDest> Select<TSrc, TDest>(this IBinding<TSrc> src, ForwardConverter<TSrc, TDest> forwardConverter, BackwardConverter<TSrc, TDest> backwardConverter)
-        => new Select<TSrc, TDest>(src, forwardConverter, (x, _) => backwardConverter(x));
-    public static IBinding<TDest> Select<TSrc, TDest>(this IBinding<TSrc> src, ForwardConverter<TSrc, TDest> forwardConverter, AdvancedBackwardConverter<TSrc, TDest> backwardConverter)
-        => new Select<TSrc, TDest>(src, forwardConverter, backwardConverter);
+    public static IBinding<TOut> Create(IBinding<TIn> src, ForwardConverter<TIn, TOut> forwardConverter, BackwardConverter<TIn, TOut> backwardConverter)
+        => new OutputBinding<TOut>(
+            new Select<TIn, TOut>(src, forwardConverter).AssignTo(out var impl),
+            () => impl._value,
+            x => src.CurrentValue = backwardConverter(x)
+        );
+    public static IBinding<TOut> Create(
+        IBinding<TIn> src,
+        ForwardConverter<TIn, TOut> forwardConverter,
+        AdvancedBackwardConverter<TIn, TOut> backwardConverter)
+        => new OutputBinding<TOut>(
+            new Select<TIn, TOut>(src, forwardConverter).AssignTo(out var impl),
+            () => impl._value,
+            x => src.CurrentValue = backwardConverter(x, impl.owner)
+        );
+    public static IReadOnlyBinding<TOut> Create(IReadOnlyBinding<TIn> src, ForwardConverter<TIn, TOut> forwardConverter)
+        => new OutputReadOnlyBinding<TOut>(
+            new Select<TIn, TOut>(src, forwardConverter).AssignTo(out var impl),
+            () => impl._value
+        );
 }
-class Select<TIn, TOut>(IBinding<TIn> inBinding, ForwardConverter<TIn, TOut> converter, AdvancedBackwardConverter<TIn, TOut> backwardConverter) : SelectBase<TIn, TOut>(inBinding, converter), IBinding<TOut>
+sealed partial class Select<TIn, TOut>(IReadOnlyBinding<TIn> inBinding, ForwardConverter<TIn, TOut> converter)
+    : BindingNotifyBase<TOut>
 {
-    public TOut CurrentValue
+    TIn owner = inBinding.CurrentValue;
+    void SetData(TIn value)
     {
-        get => _value;
-        set => inBinding.CurrentValue = backwardConverter(value, owner);
+        if (EqualityComparer<TIn>.Default.Equals(owner, value))
+            return;
+        UnregisterValueChangingEvents();
+        UnregisterValueChangedEvents();
+        owner = value;
+        var oldValue = _value;
+        var newValue = converter(value);
+        InvokeValueChanging(oldValue, newValue);
+        _value = newValue;
+        InvokeValueChanged(oldValue, newValue);
+        RegisterValueChangingEventsIfNeeded();
+        RegisterValueChangedEventsIfNeeded();
     }
-}
-partial struct BindingsHelper<TSrc>
-{
-    public IBinding<TDest> Select<TDest>(ForwardConverter<TSrc, TDest> forwardConverter, BackwardConverter<TSrc, TDest> backwardConverter)
-        => binding.Select(forwardConverter, backwardConverter);
-    public IBinding<TDest> Select<TDest>(ForwardConverter<TSrc, TDest> forwardConverter, AdvancedBackwardConverter<TSrc, TDest> backwardConverter)
-        => binding.Select(forwardConverter, backwardConverter);
+    TOut _value = converter(inBinding.CurrentValue);
+    protected override void RegisterValueChangedEvents()
+    {
+        inBinding.ValueChanged += InitialOwner_ValueChanged;
+        SetData(inBinding.CurrentValue);
+    }
+
+    private void InitialOwner_ValueChanged(TIn oldValue, TIn newValue)
+    {
+        SetData(newValue);
+    }
+
+    protected override void UnregisterValueChangedEvents()
+    {
+        inBinding.ValueChanged -= InitialOwner_ValueChanged;
+    }
+    protected override void RegisterValueChangingEvents()
+    {
+    }
+    protected override void UnregisterValueChangingEvents()
+    {
+    }
+    protected override void RegisterRootChangedEvents()
+    {
+        inBinding.RootChanged += InvokeRootChanged;
+    }
+
+    protected override void UnregisterRootChangedEvents()
+    {
+        inBinding.RootChanged -= InvokeRootChanged;
+    }
+#if DEBUG
+    public override string ToString()
+    {
+        return $"{inBinding} > Select";
+    }
+#endif
 }

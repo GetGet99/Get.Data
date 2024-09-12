@@ -18,11 +18,11 @@ public sealed class PropertySetEquivalentCheckAttribute(PropertySetEquivalentChe
     public string CustomBooleanExpression { get; set; } = "false";
 }
 
-public enum PropertySetEquivalentCheckKinds
+public enum PropertySetEquivalentCheckKinds : byte
 {
-    Auto = 0,
-    ReferenceEquals = 1,
-    DefaultEqualityComparer = 2,
-    DoNotCheck = 3,
+    DoNotCheck = 0,
+    Auto = 1,
+    ReferenceEquals = 2,
+    DefaultEqualityComparer = 3,
     Custom = 4
 }

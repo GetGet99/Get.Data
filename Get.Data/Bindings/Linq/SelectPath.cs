@@ -1,24 +1,43 @@
+using Get.Data.Helpers;
+
 namespace Get.Data.Bindings.Linq;
-abstract class SelectPathBase<TOwner, TOut, TBinding>(IReadOnlyBinding<TOwner> bindingOwner, Func<TOwner, TBinding> pDef) : BindingNotifyBase<TOut>
-    where TBinding : INotifyBinding<TOut>, IReadOnlyBinding<TOut>
+public delegate IReadOnlyBinding<TDest> SelectPathDelegate<TSrc, TDest>(TSrc item);
+partial class SelectPath<TSrc, TDest>
 {
-    TOwner owner = bindingOwner.CurrentValue;
-    void SetData(TOwner value)
+    public static IBinding<TDest> Create(IReadOnlyBinding<TSrc> src, Func<TSrc, IBinding<TDest>> selector)
+        => new OutputBinding<TDest>(
+            new SelectPath<TSrc, TDest>(src, x => selector(x)).AssignTo(out var impl),
+            () => impl.currentBinding is null ? default! : impl.currentBinding.CurrentValue,
+            value => (impl.currentBinding as IBinding<TDest> ?? throw new NullReferenceException()).CurrentValue = value
+        );
+    public static IReadOnlyBinding<TDest> Create(IReadOnlyBinding<TSrc> src, SelectPathDelegate<TSrc, TDest> selector)
+        => new OutputReadOnlyBinding<TDest>(
+            new SelectPath<TSrc, TDest>(src, x => selector(x)).AssignTo(out var impl),
+            () => impl.currentBinding is null ? default! : impl.currentBinding.CurrentValue
+        );
+}
+partial class SelectPath<TSrc, TDest>(
+    IReadOnlyBinding<TSrc> bindingOwner,
+    Func<TSrc, IReadOnlyBinding<TDest>> pDef
+) : BindingNotifyBase<TDest>
+{
+    TSrc owner = bindingOwner.CurrentValue;
+    void SetData(TSrc value)
     {
-        if (EqualityComparer<TOwner>.Default.Equals(owner, value))
+        if (EqualityComparer<TSrc>.Default.Equals(owner, value))
             return;
         UnregisterValueChangingEvents();
         UnregisterValueChangedEvents();
         owner = value;
-        var oldVal = default(TOut);
+        var oldVal = default(TDest);
         if (currentBinding is not null) oldVal = currentBinding.CurrentValue;
-        TBinding? newBinding;
+        IReadOnlyBinding<TDest>? newBinding;
         if (value is null)
             newBinding = default;
         else
             newBinding = pDef(value);
 
-        var newVal = default(TOut);
+        var newVal = default(TDest);
         if (newBinding is not null) newVal = newBinding.CurrentValue;
         InvokeValueChanging(oldVal!, newVal!);
         currentBinding = newBinding;
@@ -26,7 +45,7 @@ abstract class SelectPathBase<TOwner, TOut, TBinding>(IReadOnlyBinding<TOwner> b
         RegisterValueChangingEventsIfNeeded();
         RegisterValueChangedEventsIfNeeded();
     }
-    protected TBinding? currentBinding = bindingOwner.CurrentValue is null ? default : pDef(bindingOwner.CurrentValue);
+    IReadOnlyBinding<TDest?>? currentBinding = bindingOwner.CurrentValue is null ? default : pDef(bindingOwner.CurrentValue);
     protected override void RegisterValueChangedEvents()
     {
         if (currentBinding is not null)
@@ -35,7 +54,7 @@ abstract class SelectPathBase<TOwner, TOut, TBinding>(IReadOnlyBinding<TOwner> b
         SetData(bindingOwner.CurrentValue);
     }
 
-    private void InitialOwner_ValueChanged(TOwner oldValue, TOwner newValue)
+    private void InitialOwner_ValueChanged(TSrc oldValue, TSrc newValue)
     {
         SetData(newValue);
     }

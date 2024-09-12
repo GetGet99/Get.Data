@@ -8,7 +8,6 @@ using System.Linq;
 using System.Threading;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using EasyCSharp.GeneratorTools;
 namespace Get.EasyCSharp.GeneratorTools;
 
 delegate TOutput? AttributeTransformer<TOutput>(AttributeData attributeData, Compilation compilation);

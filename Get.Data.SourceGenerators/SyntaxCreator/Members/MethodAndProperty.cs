@@ -3,7 +3,6 @@ using Get.EasyCSharp.GeneratorTools.SyntaxCreator.Lines;
 using System.Collections.Generic;
 using System.Linq;
 
-using EasyCSharp.GeneratorTools;
 using Get.EasyCSharp.GeneratorTools.SyntaxCreator.Expression;
 namespace Get.EasyCSharp.GeneratorTools.SyntaxCreator.Members;
 

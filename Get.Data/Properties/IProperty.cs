@@ -2,7 +2,7 @@
 
 namespace Get.Data.Properties;
 
-public interface IProperty<T> : IBinding<T>, INotifyBinding<T>, IReadOnlyProperty<T>
+public interface IProperty<T> : IBinding<T>, IReadOnlyProperty<T>
 {
     void Bind(IBinding<T> binding, BindingModes bindingMode);
     void Bind(IReadOnlyBinding<T> binding, ReadOnlyBindingModes bindingMode);

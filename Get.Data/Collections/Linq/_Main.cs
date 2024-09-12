@@ -11,6 +11,7 @@ public static partial class Extension
     public static IUpdateCollection<T> AsUpdate<T>(this IUpdateCollection<T> c) => c;
     public static IUpdateReadOnlyCollection<T> AsUpdateReadOnly<T>(this IUpdateReadOnlyCollection<T> c) => c;
     public static IUpdateFixedSizeCollection<T> AsUpdateFixedSize<T>(this IUpdateFixedSizeCollection<T> c) => c;
+    public static IUpdateReadOnlyCollection<T> ToUpdateReadOnly<T>(this IUpdateReadOnlyCollection<T> c) => c;
 }
 public readonly partial struct GDReadOnlyCollectionHelper<T>(IGDReadOnlyCollection<T> collection);
 public readonly partial struct GDFixedSizeCollectionHelper<T>(IGDFixedSizeCollection<T> collection)
