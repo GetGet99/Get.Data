@@ -194,3 +194,73 @@ class PropertyWithConverter<TInput, TOutput>(PropertyBase<TInput> originalProper
     void ParentValueChangedCallback(TInput oldValue, TInput newValue)
         => _ValueChanged?.Invoke(forwardConvert(oldValue), forwardConvert(newValue));
 }
+public class AsyncProperty<T>(T defaultValue) : IAsyncProperty<T>
+{
+    public async Task SetValueAsync(T value)
+    {
+        var oldValue = CurrentValue;
+        if (ValueChangingAsync != null)
+            foreach (var handler in
+                ValueChangingAsync.GetInvocationList()
+                .Cast<AsyncValueChangingHandler<T>>()
+            ) await handler(oldValue, value);
+        _ValueChanging?.Invoke(oldValue, value);
+        CurrentValue = value;
+        if (ValueChangedAsync != null)
+            foreach (var handler in
+                ValueChangedAsync.GetInvocationList()
+                .Cast<AsyncValueChangedHandler<T>>()
+            ) await handler(oldValue, value);
+        _ValueChanged?.Invoke(oldValue, value);
+    }
+    public T CurrentValue { get; private set; } = defaultValue;
+
+    // RootChanged event will never be sent
+    event Action INotifyBinding<T>.RootChanged
+    {
+        add { }
+        remove { }
+    }
+    event Func<Task> IAsyncNotifyBinding<T>.RootChangedAsync
+    {
+        add { }
+        remove { }
+    }
+
+    ValueChangingHandler<T>? _ValueChanging;
+    ValueChangedHandler<T>? _ValueChanged;
+    event ValueChangingHandler<T>? INotifyBinding<T>.ValueChanging
+    {
+        add => _ValueChanging += value;
+        remove => _ValueChanging += value;
+    }
+
+    event ValueChangedHandler<T>? INotifyBinding<T>.ValueChanged
+    {
+        add => _ValueChanged += value;
+        remove => _ValueChanged += value;
+    }
+
+    public event AsyncValueChangingHandler<T>? ValueChangingAsync;
+    public event AsyncValueChangedHandler<T>? ValueChangedAsync;
+
+    IReadOnlyBinding<T>? currentBinding;
+    void ValueChangedToSourceBinding(T oldVal, T newVal)
+    {
+        if (currentBinding != null && currentBinding is IBinding<T> readWriteBinding)
+            readWriteBinding.CurrentValue = newVal;
+    }
+    public void BindOneWayToSource(IBinding<T> binding)
+    {
+        currentBinding = binding;
+        binding.CurrentValue = CurrentValue;
+        _ValueChanged += ValueChangedToSourceBinding;
+    }
+
+    public void RemoveBinding()
+    {
+        currentBinding = null;
+        _ValueChanged -= ValueChangedToSourceBinding;
+    }
+
+}

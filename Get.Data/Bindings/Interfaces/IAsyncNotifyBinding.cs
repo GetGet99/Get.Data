@@ -7,7 +7,7 @@ public delegate Task AsyncValueChangingHandler<T>(T oldValue, T newValue);
 public delegate Task AsyncValueChangedHandler<T>(T oldValue, T newValue);
 public interface IAsyncNotifyBinding<T>
 {
-    event Func<Task> RootChanged;
-    event AsyncValueChangingHandler<T>? ValueChanging;
-    event AsyncValueChangedHandler<T>? ValueChanged;
+    event Func<Task>? RootChangedAsync;
+    event AsyncValueChangingHandler<T>? ValueChangingAsync;
+    event AsyncValueChangedHandler<T>? ValueChangedAsync;
 }
