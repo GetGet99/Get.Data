@@ -34,12 +34,12 @@ public static class AutoTyper
     public static IReadOnlyProperty<T> AutoReadOnly<T>(IProperty<T> defaultValue)
         => new ReadOnlyProperty<T>(defaultValue);
     /// <summary>
-    /// Shorthand and type-infered way to create <see cref="AsyncProperty{T}"/>
+    /// Shorthand and type-infered way to create <see cref="AsyncWriteProperty{T}"/>
     /// </summary>
     /// <typeparam name="T">The type to create, hopefully filled by compiler for you</typeparam>
     /// <param name="defaultValue">The default value</param>
     /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static IAsyncProperty<T> AutoAsync<T>(T defaultValue)
-        => new AsyncProperty<T>(defaultValue);
+    public static IAsyncWriteProperty<T> AutoAsync<T>(T defaultValue)
+        => new AsyncWriteProperty<T>(defaultValue);
 }

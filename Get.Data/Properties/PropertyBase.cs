@@ -194,7 +194,7 @@ class PropertyWithConverter<TInput, TOutput>(PropertyBase<TInput> originalProper
     void ParentValueChangedCallback(TInput oldValue, TInput newValue)
         => _ValueChanged?.Invoke(forwardConvert(oldValue), forwardConvert(newValue));
 }
-public class AsyncProperty<T>(T defaultValue) : IAsyncProperty<T>
+public class AsyncWriteProperty<T>(T defaultValue) : IAsyncWriteProperty<T>
 {
     public async Task SetValueAsync(T value)
     {
