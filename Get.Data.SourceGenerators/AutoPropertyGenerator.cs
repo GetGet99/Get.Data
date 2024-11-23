@@ -137,8 +137,10 @@ partial class AutoPropertyGenerator : AttributeBaseGenerator<
                         }
                     }
                 }.StringRepresentaion;
+                const string IPropertyDefinitionStr = "global::Get.Data.Properties.IPropertyDefinition";
+                const string IReadOnlyPropertyDefinitionStr = "global::Get.Data.Properties.IReadOnlyPropertyDefinition";
                 yield return new Property(GetSyntaxVisiblity(sym.DeclaredAccessibility),
-                    new($"{(propertyKind is 1 ? "global::Get.Data.Properties.IPropertyDefinition" : "global::Get.Data.Properties.IReadOnlyPropertyDefinition")}<{new FullType(cls)}, {new FullType(innerType)}>"),
+                    new($"{(propertyKind is 1 ? IPropertyDefinitionStr : IReadOnlyPropertyDefinitionStr)}<{new FullType(cls)}, {new FullType(innerType)}>"),
                     propertyName + "PropertyDefinition")
                 {
                     Static = true,
@@ -155,6 +157,32 @@ partial class AutoPropertyGenerator : AttributeBaseGenerator<
                         new {(propertyKind is 1 ? "global::Get.Data.Properties.PropertyDefinition" : "global::Get.Data.Properties.ReadOnlyPropertyDefinition")}<{new FullType(cls)}, {new FullType(innerType)}>
                         (x => x.{propName})
                         """)
+                }.StringRepresentaion;
+                const string QuickBindingStr = "global::Get.Data.XACL.QuickBinding";
+                const string QuickBindingOneWayToSourceStr = "global::Get.Data.XACL.QuickBindingOneWayToSource";
+                yield return new Property(GetSyntaxVisiblity(sym.DeclaredAccessibility), new($"{(propertyKind is 1 ? QuickBindingStr : QuickBindingOneWayToSourceStr)}<{new FullType(innerType)}>"), propertyName + "Binding")
+                {
+                    Documentation = new CustomDocumentation(
+                    $"""
+                        /// <summary>
+                        /// <inheritdoc cref="{cls.Name}"/>
+                        /// </summary>
+                        """
+                    ),
+                    Get = { Visibility = SyntaxVisibility.DoNotGenerate },
+                    Set =
+                    {
+                        Attributes =
+                        {
+                            () => new CustomAttribute("[MethodImpl(MethodImplOptions.AggressiveInlining)]")
+                        },
+                        Code =
+                        {
+                            new CustomLine($"value.Bind({propName});"),
+                            //() => attr.OnChanged is not null ? new MethodCall(attr.OnChanged).EndLine() : null,
+                            //list => OnSet(list, cls, propertyName, originalattr, compilation)
+                        }
+                    }
                 }.StringRepresentaion;
             }
         }

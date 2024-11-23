@@ -5,16 +5,22 @@
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
 		<LangVersion>12</LangVersion>
-		<Version>1.0.11</Version>
+		<Version>1.1.2</Version>
 		<Configurations>Debug;Release</Configurations>
 		<Platforms>AnyCPU;x64</Platforms>
+		<PackageOutputPath>D:\Programming\VS\.LocalNugetPackages</PackageOutputPath>
 	</PropertyGroup>
 
 	<ItemGroup>
-	  <PackageReference Include="PolySharp" Version="1.14.1">
-	    <PrivateAssets>all</PrivateAssets>
-	    <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-	  </PackageReference>
+		<PackageReference Include="PolySharp" Version="1.14.1">
+			<PrivateAssets>all</PrivateAssets>
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
+		<ProjectReference Include="..\Get.Data.SourceGenerators\Get.Data.SourceGenerators.csproj"
+						  Private="false">
+			<OutputItemType>Analyzer</OutputItemType>
+			<ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+		</ProjectReference>
 	</ItemGroup>
 
 	<Import Project="..\Get.Data.Shared\Get.Data.Shared.projitems" Label="Shared" />

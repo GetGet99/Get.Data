@@ -6,6 +6,14 @@
 		<Nullable>enable</Nullable>
 		<EnforceExtendedAnalyzerRules>true</EnforceExtendedAnalyzerRules>
 		<IsRoslynComponent>true</IsRoslynComponent>
+		<Version>1.1.1</Version>
+		<PackageOutputPath>D:\Programming\VS\.LocalNugetPackages</PackageOutputPath>
+	</PropertyGroup>
+	<ItemGroup>
+	  <None Include="$(OutputPath)\$(AssemblyName).dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />
+	</ItemGroup>
+	<PropertyGroup>
+		<IncludeBuildOutput>false</IncludeBuildOutput>
 	</PropertyGroup>
 
 	<ItemGroup>

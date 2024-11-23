@@ -1,4 +1,5 @@
-﻿namespace Get.Data.Bindings;
+﻿
+namespace Get.Data.Bindings;
 public class RootBinding<TOut> : BindingNotifyBase<TOut>, IReadOnlyBinding<TOut>
 {
     public TOut CurrentValue => owner;

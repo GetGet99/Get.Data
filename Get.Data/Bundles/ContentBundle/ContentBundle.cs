@@ -2,11 +2,11 @@ using Get.Data.DataTemplates;
 using Get.Data.Properties;
 
 namespace Get.Data.Bundles;
-
-public class ContentBundle<TIn, TOut> : IContentBundle<TOut>
+[AutoProperty]
+public partial class ContentBundle<TIn, TOut> : IContentBundle<TOut>
 {
-    public Property<TIn> ContentProperty { get; }
-    public Property<IDataTemplate<TIn,TOut>?> ContentTemplateProperty { get; } = new(default);
+    public IProperty<TIn> ContentProperty { get; }
+    public IProperty<IDataTemplate<TIn,TOut>?> ContentTemplateProperty { get; } = AutoTyper.Auto<IDataTemplate<TIn, TOut>?>(default);
     Property<TOut?> OutElement { get; } = new(default);
 
     public IReadOnlyProperty<TOut?> OutputContent => OutElement;
@@ -14,7 +14,7 @@ public class ContentBundle<TIn, TOut> : IContentBundle<TOut>
     IDataTemplateGeneratedValue<TIn, TOut>? _generatedValue;
     public ContentBundle(TIn defaultContent)
     {
-        ContentProperty = new(defaultContent);
+        ContentProperty = AutoTyper.Auto(defaultContent);
         ContentTemplateProperty.ValueChanged += (old, @new) =>
         {
             if (old is not null && _generatedValue is not null)
