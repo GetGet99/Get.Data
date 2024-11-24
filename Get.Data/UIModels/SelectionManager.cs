@@ -5,9 +5,14 @@ using Get.Data.Collections.Update;
 using Get.Data.Properties;
 
 namespace Get.Data.UIModels;
-
-public class SelectionManager<T>
+[AutoProperty]
+public partial class SelectionManager<T>
 {
+    public IProperty<int> SelectedIndexProperty { get; } = Auto(-1);
+    public IReadOnlyProperty<T?> SelectedValueProperty { get; } // TODO: Make it not readonly once Wrapper is done
+    readonly Property<T?> _SelectedValueProperty;
+    public IProperty<bool> PreferAlwaysSelectItemProperty { get; } = Auto(false);
+    public IUpdateReadOnlyCollection<T> Collection { get; }
     public SelectionManager() : this(new UpdateCollection<T>()) { }
     public SelectionManager(IUpdateReadOnlyCollection<T> updateCollection)
     {
@@ -18,8 +23,10 @@ public class SelectionManager<T>
         PreferAlwaysSelectItemProperty.ValueChanged += (old, @new) =>
         {
             if (@new && SelectedIndex < 0)
+            {
                 // let's trigger SelectedIndex auto selection logic
-                SelectedIndex = -1;
+                SelectedIndexProperty_ValueChanged(SelectedIndex, SelectedIndex);
+            }
         };
         SelectedValueProperty = new Wrapper(_SelectedValueProperty = new(default), this);
     }
@@ -73,7 +80,7 @@ public class SelectionManager<T>
         else
             _SelectedValueProperty.Value = default;
 
-        if (!PausePreferAlwaysSelectItemProperty && newValue is < 0 && PreferAlwaysSelectItemProperty.Value && Collection.Count > 0)
+        if (!PausePreferAlwaysSelectItemProperty && newValue is < 0 && PreferAlwaysSelectItem && Collection.Count > 0)
         {
             static int Clamp(int val, int min, int max) => val > min ? (val < max ? val : max) : min;
             var guessNewIndex = Clamp(oldValue - 1, 0, Collection.Count - 1);
@@ -89,25 +96,13 @@ public class SelectionManager<T>
             _PausePreferAlwaysSelectItemProperty = value;
             if (value == false)
             {
-                if (SelectedIndex is < 0 && PreferAlwaysSelectItemProperty.Value && Collection.Count > 0)
+                if (SelectedIndex is < 0 && PreferAlwaysSelectItem && Collection.Count > 0)
                 {
                     SelectedIndex = 0;
                 }
             }
         }
     }
-
-    public Property<int> SelectedIndexProperty { get; } = new(-1);
-    public int SelectedIndex
-    {
-        get => SelectedIndexProperty.Value;
-        set => SelectedIndexProperty.Value = value;
-    }
-    readonly Property<T?> _SelectedValueProperty;
-    public IReadOnlyProperty<T?> SelectedValueProperty { get; } // TODO: Make it not readonly once Wrapper is done
-    public T? SelectedValue => SelectedValueProperty.CurrentValue;
-    public Property<bool> PreferAlwaysSelectItemProperty { get; } = new(false);
-    public IUpdateReadOnlyCollection<T> Collection { get; }
     readonly struct Wrapper(Property<T?> SelectedValueProperty, SelectionManager<T> self) : IProperty<T?>
     {
         public T? CurrentValue {
