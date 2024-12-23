@@ -46,6 +46,7 @@ partial class AutoPropertyGenerator : AttributeBaseGenerator<
         var ReadOnlyPropertyDefinition = compilation.GetTypeByMetadataName("Get.Data.Properties.ReadOnlyPropertyDefinition`2") ?? throw new NullReferenceException();
 
         if (attributeDatas.Length is 0) yield break;
+        bool isInterface = cls.TypeKind == TypeKind.Interface;
         foreach (var item in cls.GetMembers())
         {
             if (item is IPropertySymbol sym)
@@ -86,6 +87,7 @@ partial class AutoPropertyGenerator : AttributeBaseGenerator<
                     ),
                     Get =
                     {
+                        Shortened = isInterface,
                         Attributes =
                         {
                             () => new CustomAttribute("[MethodImpl(MethodImplOptions.AggressiveInlining)]")
@@ -97,6 +99,7 @@ partial class AutoPropertyGenerator : AttributeBaseGenerator<
                     },
                     Set =
                     {
+                        Shortened = isInterface,
                         Visibility = propertyKind is 2 ? SyntaxVisibility.DoNotGenerate : SyntaxVisibility.Default,
                         Attributes =
                         {
@@ -139,25 +142,26 @@ partial class AutoPropertyGenerator : AttributeBaseGenerator<
                 }.StringRepresentaion;
                 const string IPropertyDefinitionStr = "global::Get.Data.Properties.IPropertyDefinition";
                 const string IReadOnlyPropertyDefinitionStr = "global::Get.Data.Properties.IReadOnlyPropertyDefinition";
-                yield return new Property(GetSyntaxVisiblity(sym.DeclaredAccessibility),
-                    new($"{(propertyKind is 1 ? IPropertyDefinitionStr : IReadOnlyPropertyDefinitionStr)}<{new FullType(cls)}, {new FullType(innerType)}>"),
-                    propertyName + "PropertyDefinition")
-                {
-                    Static = true,
-                    Documentation = new CustomDocumentation(
-                    $"""
-                    /// <summary>
-                    /// <inheritdoc cref="{cls.Name}"/>
-                    /// </summary>
-                    """
-                    ),
-                    Get = { Shortened = true },
-                    Set = { Visibility = SyntaxVisibility.DoNotGenerate },
-                    CustomEqualExpression = new CustomExpression($"""
-                        new {(propertyKind is 1 ? "global::Get.Data.Properties.PropertyDefinition" : "global::Get.Data.Properties.ReadOnlyPropertyDefinition")}<{new FullType(cls)}, {new FullType(innerType)}>
-                        (x => x.{propName})
-                        """)
-                }.StringRepresentaion;
+                if (!isInterface)
+                    yield return new Property(GetSyntaxVisiblity(sym.DeclaredAccessibility),
+                        new($"{(propertyKind is 1 ? IPropertyDefinitionStr : IReadOnlyPropertyDefinitionStr)}<{new FullType(cls)}, {new FullType(innerType)}>"),
+                        propertyName + "PropertyDefinition")
+                    {
+                        Static = true,
+                        Documentation = new CustomDocumentation(
+                        $"""
+                        /// <summary>
+                        /// <inheritdoc cref="{cls.Name}"/>
+                        /// </summary>
+                        """
+                        ),
+                        Get = { Shortened = true },
+                        Set = { Visibility = SyntaxVisibility.DoNotGenerate },
+                        CustomEqualExpression = new CustomExpression($"""
+                            new {(propertyKind is 1 ? "global::Get.Data.Properties.PropertyDefinition" : "global::Get.Data.Properties.ReadOnlyPropertyDefinition")}<{new FullType(cls)}, {new FullType(innerType)}>
+                            (x => x.{propName})
+                            """)
+                    }.StringRepresentaion;
                 const string QuickBindingStr = "global::Get.Data.XACL.QuickBinding";
                 const string QuickBindingOneWayToSourceStr = "global::Get.Data.XACL.QuickBindingOneWayToSource";
                 yield return new Property(GetSyntaxVisiblity(sym.DeclaredAccessibility), new($"{(propertyKind is 1 ? QuickBindingStr : QuickBindingOneWayToSourceStr)}<{new FullType(innerType)}>"), propertyName + "Binding")
@@ -172,6 +176,7 @@ partial class AutoPropertyGenerator : AttributeBaseGenerator<
                     Get = { Visibility = SyntaxVisibility.DoNotGenerate },
                     Set =
                     {
+                        Shortened = isInterface,
                         Attributes =
                         {
                             () => new CustomAttribute("[MethodImpl(MethodImplOptions.AggressiveInlining)]")

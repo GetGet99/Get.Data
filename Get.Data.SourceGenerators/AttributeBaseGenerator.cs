@@ -123,12 +123,19 @@ abstract class AttributeBaseGenerator<TAttribute1, TAttributeDataType1, TSyntaxN
             
             namespace {{containingClass.ContainingNamespace}}
             {
-                partial class {{classHeader}}
+                partial {{containingClass.TypeKind switch
                 {
+                    TypeKind.Interface => "interface",
+                    TypeKind.Struct => "struct",
+                    TypeKind.Class or _ => "class",
+                }}} {{classHeader}}
+                {
+                    {{
                     // Original
                     /*
                     {{syntaxNode.ToString().IndentWOF(2)}}
                     */
+                    ""}}
                     
                     {{output.IndentWOF(2)}}
                 }

@@ -2,7 +2,7 @@
 using System;
 
 namespace Get.Data.Properties;
-[AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct, AllowMultiple = false)]
+[AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct | AttributeTargets.Interface, AllowMultiple = false)]
 public sealed class AutoPropertyAttribute : Attribute;
 
 [AttributeUsage(AttributeTargets.Property, AllowMultiple = false)]
