@@ -4,3 +4,8 @@ public interface IPropertyDefinition<TOwner, TProperty> : IReadOnlyPropertyDefin
 {
     new IProperty<TProperty> GetProperty(TOwner owner);
 }
+
+//public interface IPropertyDefinition<TProperty> : IReadOnlyPropertyDefinition<TProperty>
+//{
+//    new IProperty<TProperty> GetProperty(TOwner owner);
+//}
